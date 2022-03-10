@@ -24,12 +24,15 @@ import id.jrosclient.core.TopicSubscriber;
 import id.jrosclient.core.utils.TextUtils;
 import id.jrosclient.core.utils.Utils;
 import id.jrosmessages.Message;
+import id.jrosmessages.MessageSerializationUtils;
 import id.jrosmessages.MetadataAccessor;
+import id.xfunction.concurrent.flow.SimpleSubscriber;
 import id.xfunction.logging.XLogger;
 import java.io.IOException;
 import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.logging.Logger;
+import pinorobotics.rtpstalk.RtpsTalkClient;
 
 /**
  * Main class of the library which allows to interact with ROS.
@@ -49,6 +52,8 @@ public class JRos2Client implements JRosClient {
     private MetadataAccessor metadataAccessor = new MetadataAccessor();
     private JRos2ClientConfiguration configuration;
     private TextUtils textUtils;
+    private RtpsTalkClient rtpsTalkClient;
+    private MessageSerializationUtils serializationUtils;
 
     /** Default constructor which creates a client with default configuration */
     public JRos2Client() {
@@ -63,6 +68,8 @@ public class JRos2Client implements JRosClient {
     /** @hidden visible for testing */
     public JRos2Client(JRos2ClientConfiguration config, ObjectsFactory factory) {
         textUtils = factory.createTextUtils(config);
+        rtpsTalkClient = factory.createRtpsTalkClient();
+        serializationUtils = factory.createMessageSerializationUtils();
         configuration = config;
     }
 
@@ -75,6 +82,12 @@ public class JRos2Client implements JRosClient {
     public <M extends Message> void subscribe(
             String topic, Class<M> messageClass, Subscriber<M> subscriber) throws Exception {
         var topicType = metadataAccessor.getType(messageClass);
+        rtpsTalkClient.subscribe(topic, topicType, null, new SimpleSubscriber<byte[]>() {
+            @Override
+            public void onNext(byte[] item) {
+                serializationUtils.read(item, messageClass);
+            }
+        });
     }
 
     @Override

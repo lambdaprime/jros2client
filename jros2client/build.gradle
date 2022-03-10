@@ -23,60 +23,19 @@ eclipse.classpath.file {
     }
 }
 
-// Excluding transient dependencies which are not used
-configurations {
-    implementation {
-        exclude(group: 'xml-apis', module: 'xml-apis')
-        exclude(group: 'junit', module: 'junit')
-        exclude(group: 'log4j', module: 'log4j')
-        exclude(group: 'javax.servlet', module: 'servlet-api')
-    }
-    apiElements {
-        exclude(group: 'xml-apis', module: 'xml-apis')
-        exclude(group: 'junit', module: 'junit')
-        exclude(group: 'log4j', module: 'log4j')
-        exclude(group: 'javax.servlet', module: 'servlet-api')
-    }
-}
-
 dependencies {
-    implementation 'org.apache.xmlrpc:xmlrpc-client:3.1.3'
-    implementation 'org.apache.xmlrpc:xmlrpc-server:3.1.3'
-    implementation 'io.github.lambdaprime:jrosclient.core:1.0'
-    implementation 'io.github.lambdaprime:jrosmessages:1.0'
+    implementation 'io.github.lambdaprime:jrosclient.core:1.0-SNAPSHOT'
     implementation 'io.github.lambdaprime:id.xfunction:16.0-SNAPSHOT'
-    implementation 'io.github.lambdaprime:ICE:2.0'
-    implementation 'io.github.lambdaprime:kineticstreamer:3.0'
+    implementation 'io.github.pinorobotics:rtpstalk:1.0-SNAPSHOT'
 
     // transitively export following dependency to tests project
-    apiElements 'org.apache.xmlrpc:xmlrpc-client:3.1.3'
-    apiElements 'org.apache.xmlrpc:xmlrpc-server:3.1.3'
-    apiElements 'io.github.lambdaprime:jrosclient.core:1.0'
-    apiElements 'io.github.lambdaprime:jrosmessages:1.0'
+    apiElements 'io.github.lambdaprime:jrosclient.core:1.0-SNAPSHOT'
     apiElements 'io.github.lambdaprime:id.xfunction:16.0-SNAPSHOT'
-    apiElements 'io.github.lambdaprime:ICE:2.0'
-    apiElements 'io.github.lambdaprime:kineticstreamer:3.0'
+    apiElements 'io.github.pinorobotics:rtpstalk:1.0-SNAPSHOT'
 }
 
 sourceCompatibility = '17'
 targetCompatibility = '17'
-
-java {
-    // disable Gradle modularity support since it is not working properly
-    // for non modules like xmlrpc and setup module path manually later:
-    // https://github.com/gradle/gradle/issues/17609
-    // https://github.com/gradle/gradle/issues/12630
-    modularity.inferModulePath = false
-}
-
-compileJava {
-    doFirst {
-        options.compilerArgs = [
-            '--module-path', classpath.asPath
-        ]
-        classpath = files()
-    }
-}
 
 jar {
     manifest { 
@@ -84,17 +43,7 @@ jar {
     }
 }
 
-sourceSets {
-    main {
-        java {
-            srcDirs += ["src/main/gen/java"]
-        }
-    }
-}
-
 javadoc {
-    options.modulePath = classpath.getFiles().stream()
-        .collect(java.util.stream.Collectors.toList())
     exclude 'id/jros2client/app/**'
     options.noTimestamp = true
     options.noQualifiers = ["all"]
@@ -119,14 +68,7 @@ task copyLibs(type: Copy) {
     into "${packageDir}/libs"
 }
 
-task copySamples(type: Copy) {
-    from("${project.rootDir}/jros2client.samples/src") {
-        include "**"
-    }
-    into "${packageDir}/samples"
-}
-
-task createPackage(type: Copy, dependsOn: [copyLibs, copySamples]) {
+task createPackage(type: Copy, dependsOn: [copyLibs]) {
     from "${project.rootDir}/README.md"
     from "${project.rootDir}/LICENSE-2.0.txt"
     from file("$projectDir/src/jros2client")

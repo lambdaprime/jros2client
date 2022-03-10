@@ -19,6 +19,8 @@ package id.jros2client.impl;
 
 import id.jros2client.JRos2ClientConfiguration;
 import id.jrosclient.core.utils.TextUtils;
+import id.jrosmessages.MessageSerializationUtils;
+import pinorobotics.rtpstalk.RtpsTalkClient;
 
 /** This factory is a single point for managing all dependencies. */
 public class ObjectsFactory {
@@ -29,6 +31,10 @@ public class ObjectsFactory {
         return new JRos2ClientConfiguration();
     }
 
+    public RtpsTalkClient createRtpsTalkClient() {
+        return new RtpsTalkClient();
+    }
+    
     public static ObjectsFactory getInstance() {
         return instance;
     }
@@ -42,5 +48,9 @@ public class ObjectsFactory {
         if (config.getMaxMessageLoggingLength() != -1)
             utils.withEllipsize(config.getMaxMessageLoggingLength());
         return utils;
+    }
+
+    public MessageSerializationUtils createMessageSerializationUtils() {
+        return new MessageSerializationUtils();
     }
 }
