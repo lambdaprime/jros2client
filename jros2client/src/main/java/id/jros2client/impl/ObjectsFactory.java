@@ -19,6 +19,7 @@ package id.jros2client.impl;
 
 import id.jros2client.JRos2ClientConfiguration;
 import id.jrosclient.core.utils.TextUtils;
+import id.jrosmessages.MessageFormat;
 import id.jrosmessages.MessageSerializationUtils;
 import pinorobotics.rtpstalk.RtpsTalkClient;
 
@@ -34,7 +35,7 @@ public class ObjectsFactory {
     public RtpsTalkClient createRtpsTalkClient() {
         return new RtpsTalkClient();
     }
-    
+
     public static ObjectsFactory getInstance() {
         return instance;
     }
@@ -51,6 +52,6 @@ public class ObjectsFactory {
     }
 
     public MessageSerializationUtils createMessageSerializationUtils() {
-        return new MessageSerializationUtils();
+        return new MessageSerializationUtils(MessageFormat.ROS2);
     }
 }

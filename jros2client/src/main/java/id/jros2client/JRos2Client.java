@@ -18,19 +18,23 @@
 package id.jros2client;
 
 import id.jros2client.impl.ObjectsFactory;
+import id.jros2client.impl.Ros2NameUtils;
 import id.jrosclient.core.JRosClient;
+import id.jrosclient.core.RosVersion;
 import id.jrosclient.core.TopicPublisher;
 import id.jrosclient.core.TopicSubscriber;
+import id.jrosclient.core.utils.RosNameUtils;
 import id.jrosclient.core.utils.TextUtils;
-import id.jrosclient.core.utils.Utils;
 import id.jrosmessages.Message;
 import id.jrosmessages.MessageSerializationUtils;
 import id.jrosmessages.MetadataAccessor;
-import id.xfunction.concurrent.flow.SimpleSubscriber;
+import id.xfunction.concurrent.SameThreadExecutorService;
+import id.xfunction.concurrent.flow.TransformProcessor;
 import id.xfunction.logging.XLogger;
 import java.io.IOException;
 import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.Flow.Subscriber;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import pinorobotics.rtpstalk.RtpsTalkClient;
 
@@ -44,7 +48,7 @@ import pinorobotics.rtpstalk.RtpsTalkClient;
 public class JRos2Client implements JRosClient {
 
     private static final ObjectsFactory objectsFactory = new ObjectsFactory();
-    private static final Utils utils = new Utils();
+    private static final Ros2NameUtils rosNameUtils = new Ros2NameUtils(new RosNameUtils());
 
     private final Logger LOGGER = XLogger.getLogger(this);
 
@@ -81,13 +85,13 @@ public class JRos2Client implements JRosClient {
     @Override
     public <M extends Message> void subscribe(
             String topic, Class<M> messageClass, Subscriber<M> subscriber) throws Exception {
-        var topicType = metadataAccessor.getType(messageClass);
-        rtpsTalkClient.subscribe(topic, topicType, null, new SimpleSubscriber<byte[]>() {
-            @Override
-            public void onNext(byte[] item) {
-                serializationUtils.read(item, messageClass);
-            }
-        });
+        var topicType = rosNameUtils.toDdsMessageType(metadataAccessor.getType(messageClass));
+        topic = rosNameUtils.toDdsTopic(topic);
+        Function<byte[], M> deserializer = input -> serializationUtils.read(input, messageClass);
+        var transformer =
+                new TransformProcessor<>(deserializer, new SameThreadExecutorService(), 1);
+        transformer.subscribe(subscriber);
+        rtpsTalkClient.subscribe(topic, topicType, transformer);
     }
 
     @Override
@@ -107,5 +111,12 @@ public class JRos2Client implements JRosClient {
     }
 
     @Override
-    public void close() throws IOException {}
+    public void close() {
+        rtpsTalkClient.close();
+    }
+
+    @Override
+    public RosVersion getSupportedRosVersion() {
+        return RosVersion.ROS2;
+    }
 }
