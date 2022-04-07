@@ -96,13 +96,18 @@ public class JRos2Client implements JRosClient {
 
     @Override
     public <M extends Message> void publish(TopicPublisher<M> publisher) throws Exception {
-        throw new UnsupportedOperationException();
+        publish(publisher.getTopic(), publisher.getMessageClass(), publisher);
     }
 
     @Override
     public <M extends Message> void publish(
             String topic, Class<M> messageClass, Publisher<M> publisher) throws Exception {
-        throw new UnsupportedOperationException();
+        var topicType = rosNameUtils.toDdsMessageType(metadataAccessor.getType(messageClass));
+        topic = rosNameUtils.toDdsTopic(topic);
+        Function<M, byte[]> serializer = input -> serializationUtils.write(input);
+        var transformer = new TransformProcessor<>(serializer, new SameThreadExecutorService(), 1);
+        publisher.subscribe(transformer);
+        rtpsTalkClient.publish(topic, topicType, transformer);
     }
 
     @Override

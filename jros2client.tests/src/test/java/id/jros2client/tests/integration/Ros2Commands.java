@@ -33,8 +33,14 @@ public class Ros2Commands implements AutoCloseable {
         return proc;
     }
 
+    public XProcess runListener() {
+        var proc = new XExec("ros2 run demo_nodes_cpp listener").run();
+        procs.add(proc);
+        return proc;
+    }
+
     @Override
     public void close() {
-        procs.forEach(proc -> proc.process().destroyForcibly());
+        procs.forEach(XProcess::destroyAllForcibly);
     }
 }

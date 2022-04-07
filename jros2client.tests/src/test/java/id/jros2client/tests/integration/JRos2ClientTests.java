@@ -20,13 +20,16 @@ package id.jros2client.tests.integration;
 import static java.util.stream.Collectors.toList;
 
 import id.jros2client.JRos2Client;
+import id.jrosclient.core.TopicSubmissionPublisher;
 import id.jrosclient.core.TopicSubscriber;
 import id.jrosmessages.std_msgs.StringMessage;
+import id.xfunction.lang.XThread;
 import id.xfunction.logging.XLogger;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -58,9 +61,8 @@ public class JRos2ClientTests {
     @Test
     public void test_subscribe_happy() throws Exception {
         var future = new CompletableFuture<List<Integer>>();
-        var topic = "chatter";
         client.subscribe(
-                new TopicSubscriber<>(StringMessage.class, topic) {
+                new TopicSubscriber<>(StringMessage.class, "chatter") {
                     private List<Integer> buf = new ArrayList<>();
 
                     @Override
@@ -69,9 +71,8 @@ public class JRos2ClientTests {
                         var n = Integer.parseInt(item.data.substring("Hello World: ".length()));
                         buf.add(n);
                         if (buf.size() == 5) {
-                            var reduce = buf.get(0).intValue();
                             getSubscription().cancel();
-                            future.complete(buf.stream().map(i -> i - reduce).collect(toList()));
+                            future.complete(reduceByFirst(buf));
                             return;
                         }
                         getSubscription().request(1);
@@ -79,5 +80,39 @@ public class JRos2ClientTests {
                 });
         ros2Commands.runTalker().forward();
         Assertions.assertEquals("[0, 1, 2, 3, 4]", future.get().toString());
+    }
+
+    @Test
+    public void test_publish_happy() throws Exception {
+        var publisher = new TopicSubmissionPublisher<>(StringMessage.class, "chatter");
+        client.publish(publisher);
+        var proc = ros2Commands.runListener();
+        ForkJoinPool.commonPool()
+                .execute(
+                        () -> {
+                            int c = 0;
+                            while (true) {
+                                publisher.submit(new StringMessage("" + c++));
+                                XThread.sleep(100);
+                            }
+                        });
+        var actual =
+                proc.stderr()
+                        .peek(System.out::println)
+                        .limit(10)
+                        .map(
+                                line ->
+                                        Integer.parseInt(
+                                                line.replaceAll(".*I heard: \\[(\\d*)\\]", "$1")))
+                        .sorted()
+                        .collect(toList());
+        proc.flush(true);
+        actual = reduceByFirst(actual);
+        Assertions.assertEquals("[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]", actual.toString());
+    }
+
+    private List<Integer> reduceByFirst(List<Integer> buf) {
+        var first = buf.get(0).intValue();
+        return buf.stream().map(i -> i - first).collect(toList());
     }
 }
