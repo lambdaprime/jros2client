@@ -18,7 +18,7 @@
 package id.jros2client.impl;
 
 import id.jros2client.JRos2ClientConfiguration;
-import id.jrosclient.core.utils.TextUtils;
+import id.jrosclient.utils.TextUtils;
 import id.jrosmessages.MessageFormat;
 import id.jrosmessages.MessageSerializationUtils;
 import pinorobotics.rtpstalk.RtpsTalkClient;

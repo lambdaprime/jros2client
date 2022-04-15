@@ -28,6 +28,9 @@ allprojects {
 }
 
 subprojects {
+    sourceCompatibility = '17'
+    targetCompatibility = '17'
+
     // setup spotless config for all subprojects
     def spotlessConfig = {
       spotless {

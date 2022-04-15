@@ -19,12 +19,12 @@ package id.jros2client;
 
 import id.jros2client.impl.ObjectsFactory;
 import id.jros2client.impl.Ros2NameUtils;
-import id.jrosclient.core.JRosClient;
-import id.jrosclient.core.RosVersion;
-import id.jrosclient.core.TopicPublisher;
-import id.jrosclient.core.TopicSubscriber;
-import id.jrosclient.core.utils.RosNameUtils;
-import id.jrosclient.core.utils.TextUtils;
+import id.jrosclient.JRosClient;
+import id.jrosclient.RosVersion;
+import id.jrosclient.TopicPublisher;
+import id.jrosclient.TopicSubscriber;
+import id.jrosclient.utils.RosNameUtils;
+import id.jrosclient.utils.TextUtils;
 import id.jrosmessages.Message;
 import id.jrosmessages.MessageSerializationUtils;
 import id.jrosmessages.MetadataAccessor;
@@ -112,7 +112,7 @@ public class JRos2Client implements JRosClient {
 
     @Override
     public void unpublish(String topic) throws IOException {
-        throw new UnsupportedOperationException();
+        new UnsupportedOperationException().printStackTrace();
     }
 
     @Override

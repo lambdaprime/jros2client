@@ -17,7 +17,7 @@
  */
 package id.jros2client.impl;
 
-import id.jrosclient.core.utils.RosNameUtils;
+import id.jrosclient.utils.RosNameUtils;
 import id.xfunction.Preconditions;
 import java.nio.file.Paths;
 

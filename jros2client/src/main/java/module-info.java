@@ -26,7 +26,7 @@
 module jros2client {
     requires id.xfunction;
     requires java.logging;
-    requires transitive jrosclient.core;
+    requires transitive jrosclient;
     requires rtpstalk;
 
     exports id.jros2client;

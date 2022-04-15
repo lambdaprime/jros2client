@@ -20,8 +20,8 @@ package id.jros2client.tests.integration;
 import static java.util.stream.Collectors.toList;
 
 import id.jros2client.JRos2Client;
-import id.jrosclient.core.TopicSubmissionPublisher;
-import id.jrosclient.core.TopicSubscriber;
+import id.jrosclient.TopicSubmissionPublisher;
+import id.jrosclient.TopicSubscriber;
 import id.jrosmessages.std_msgs.StringMessage;
 import id.xfunction.lang.XThread;
 import id.xfunction.logging.XLogger;
