@@ -19,6 +19,7 @@ package id.jros2client;
 
 import id.jros2client.impl.ObjectsFactory;
 import id.jros2client.impl.Ros2NameUtils;
+import id.jros2messages.MessageSerializationUtils;
 import id.jrosclient.JRosClient;
 import id.jrosclient.RosVersion;
 import id.jrosclient.TopicPublisher;
@@ -26,7 +27,6 @@ import id.jrosclient.TopicSubscriber;
 import id.jrosclient.utils.RosNameUtils;
 import id.jrosclient.utils.TextUtils;
 import id.jrosmessages.Message;
-import id.jrosmessages.MessageSerializationUtils;
 import id.jrosmessages.MetadataAccessor;
 import id.xfunction.concurrent.SameThreadExecutorService;
 import id.xfunction.concurrent.flow.TransformProcessor;

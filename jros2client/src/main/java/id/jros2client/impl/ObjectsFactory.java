@@ -18,9 +18,8 @@
 package id.jros2client.impl;
 
 import id.jros2client.JRos2ClientConfiguration;
+import id.jros2messages.MessageSerializationUtils;
 import id.jrosclient.utils.TextUtils;
-import id.jrosmessages.MessageFormat;
-import id.jrosmessages.MessageSerializationUtils;
 import pinorobotics.rtpstalk.RtpsTalkClient;
 
 /** This factory is a single point for managing all dependencies. */
@@ -52,6 +51,6 @@ public class ObjectsFactory {
     }
 
     public MessageSerializationUtils createMessageSerializationUtils() {
-        return new MessageSerializationUtils(MessageFormat.ROS2);
+        return new MessageSerializationUtils();
     }
 }

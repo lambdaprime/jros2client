@@ -25,11 +25,13 @@ eclipse.classpath.file {
 
 dependencies {
     implementation 'io.github.lambdaprime:jrosclient:5.0-SNAPSHOT'
+    implementation 'io.github.lambdaprime:jros2messages:1.0-SNAPSHOT'
     implementation 'io.github.lambdaprime:id.xfunction:16.0-SNAPSHOT'
     implementation 'io.github.pinorobotics:rtpstalk:1.0-SNAPSHOT'
 
     // transitively export following dependency to tests project
     apiElements 'io.github.lambdaprime:jrosclient:5.0-SNAPSHOT'
+    apiElements 'io.github.lambdaprime:jros2messages:1.0-SNAPSHOT'
     apiElements 'io.github.lambdaprime:id.xfunction:16.0-SNAPSHOT'
     apiElements 'io.github.pinorobotics:rtpstalk:1.0-SNAPSHOT'
 }
