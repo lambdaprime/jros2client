@@ -6,4 +6,5 @@ open module jros2client.tests {
     requires id.kineticstreamer;
     requires org.junit.jupiter.params;
     requires org.junit.platform.commons;
+    requires jrosclient;
 }

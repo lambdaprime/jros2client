@@ -1,4 +1,4 @@
-**jros2client** - Java module which allows to interact with ROS (Robot Operating System).
+**jros2client** - Java module which allows to interact with ROS2 (Robot Operating System).
 
 # Requirements
 

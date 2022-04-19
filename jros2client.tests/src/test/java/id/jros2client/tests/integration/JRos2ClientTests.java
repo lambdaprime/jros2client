@@ -19,7 +19,8 @@ package id.jros2client.tests.integration;
 
 import static java.util.stream.Collectors.toList;
 
-import id.jros2client.JRos2Client;
+import id.jros2client.JRos2ClientFactory;
+import id.jrosclient.JRosClient;
 import id.jrosclient.TopicSubmissionPublisher;
 import id.jrosclient.TopicSubscriber;
 import id.jrosmessages.std_msgs.StringMessage;
@@ -38,8 +39,9 @@ import org.junit.jupiter.api.Test;
 
 public class JRos2ClientTests {
 
+    private static final JRos2ClientFactory factory = new JRos2ClientFactory();
     private static Ros2Commands ros2Commands;
-    private static JRos2Client client;
+    private static JRosClient client;
 
     @BeforeAll
     public static void setupAll() {
@@ -48,7 +50,7 @@ public class JRos2ClientTests {
 
     @BeforeEach
     public void setup() throws MalformedURLException {
-        client = new JRos2Client();
+        client = factory.createJRosClient();
         ros2Commands = new Ros2Commands();
     }
 

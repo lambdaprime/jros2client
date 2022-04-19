@@ -47,7 +47,6 @@ import pinorobotics.rtpstalk.RtpsTalkClient;
  */
 public class JRos2Client implements JRosClient {
 
-    private static final ObjectsFactory objectsFactory = new ObjectsFactory();
     private static final Ros2NameUtils rosNameUtils = new Ros2NameUtils(new RosNameUtils());
 
     private final Logger LOGGER = XLogger.getLogger(this);
@@ -59,18 +58,7 @@ public class JRos2Client implements JRosClient {
     private RtpsTalkClient rtpsTalkClient;
     private MessageSerializationUtils serializationUtils;
 
-    /** Default constructor which creates a client with default configuration */
-    public JRos2Client() {
-        this(objectsFactory.createConfig());
-    }
-
-    /** Constructor which creates a client with given client configuration */
-    public JRos2Client(JRos2ClientConfiguration config) {
-        this(config, objectsFactory);
-    }
-
-    /** @hidden visible for testing */
-    public JRos2Client(JRos2ClientConfiguration config, ObjectsFactory factory) {
+    JRos2Client(JRos2ClientConfiguration config, ObjectsFactory factory) {
         textUtils = factory.createTextUtils(config);
         rtpsTalkClient = factory.createRtpsTalkClient();
         serializationUtils = factory.createMessageSerializationUtils();
@@ -123,5 +111,11 @@ public class JRos2Client implements JRosClient {
     @Override
     public RosVersion getSupportedRosVersion() {
         return RosVersion.ROS2;
+    }
+
+    @Override
+    public boolean hasPublisher(String topic) {
+        new UnsupportedOperationException().printStackTrace();
+        return false;
     }
 }
