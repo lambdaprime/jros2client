@@ -25,7 +25,6 @@ import id.jrosclient.RosVersion;
 import id.jrosclient.TopicPublisher;
 import id.jrosclient.TopicSubscriber;
 import id.jrosclient.utils.RosNameUtils;
-import id.jrosclient.utils.TextUtils;
 import id.jrosmessages.Message;
 import id.jrosmessages.MetadataAccessor;
 import id.xfunction.concurrent.SameThreadExecutorService;
@@ -54,12 +53,10 @@ public class JRos2Client implements JRosClient {
     private String masterUrl;
     private MetadataAccessor metadataAccessor = new MetadataAccessor();
     private JRos2ClientConfiguration configuration;
-    private TextUtils textUtils;
     private RtpsTalkClient rtpsTalkClient;
     private MessageSerializationUtils serializationUtils;
 
     JRos2Client(JRos2ClientConfiguration config, ObjectsFactory factory) {
-        textUtils = factory.createTextUtils(config);
         rtpsTalkClient = factory.createRtpsTalkClient();
         serializationUtils = factory.createMessageSerializationUtils();
         configuration = config;

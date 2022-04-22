@@ -17,112 +17,41 @@
  */
 package id.jros2client;
 
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
- * Configuration parameters of JRosClient
+ * Configuration parameters of {@link JRos2Client}
  *
  * @author lambdaprime intid@protonmail.com
  */
-public class JRos2ClientConfiguration {
+public record JRos2ClientConfiguration() {
 
-    public static final int START_TCP_ROS_SERVER_PORT = 1235;
-    public static final int START_NODE_SERVER_PORT = 1234;
-    public static final String HOST_NAME = "localhost";
+    //    public static class Builder {
+    //
+    //        public static final int DEFAULT_START_PORT = 7412;
+    //
+    //        public List<String> networkIfaces = List.of();
+    //        private int startPort;
+    //
+    //        /**
+    //         * List of network interfaces which {@link JRos2Client} will be working on.
+    //         *
+    //         * <p>By default it is active on all network interfaces but for performance reasons
+    //         * it is recommended to keep it active only for those interfaces where
+    //         * ROS is available.
+    //         */
+    //        public Builder networkInterfaces(String... networkIfaces) {
+    //            this.networkIfaces = Arrays.asList(networkIfaces);
+    //            return this;
+    //        }
+    //
+    //        /**
+    //         * Default starting port from which port assignment for {@link JRos2Client}
+    //         * will happen. {@link JRos2Client} will be listening them and using for
+    //         * discovery of other ROS nodes and  them for communication with them.
+    //         */
+    //        public Builder startPort(int startPort) {
+    //            this.startPort = startPort;
+    //            return this;
+    //        }
+    //    }
 
-    private static final AtomicInteger nextTcpRosServerPort =
-            new AtomicInteger(START_TCP_ROS_SERVER_PORT);
-    private static final AtomicInteger nextNodeServerPort =
-            new AtomicInteger(START_NODE_SERVER_PORT);
-
-    private int tcpRosServerPort = nextTcpRosServerPort.addAndGet(2);
-    private int nodeServerPort = nextNodeServerPort.addAndGet(2);
-    private String hostName = HOST_NAME;
-    private String callerId = "jrosclient-" + UUID.randomUUID();
-    private int maxMessageLoggingLength = -1;
-
-    /**
-     * Port for TCPROS.
-     *
-     * <p>TCPROS is a transport layer responsible for publishing messages.
-     *
-     * <p>This is a port to which other ROS nodes connect once they subscribe to any topic published
-     * through JRosClient.
-     *
-     * <p>JRosClient by default tries to use any available port starting from {@link
-     * START_TCP_ROS_SERVER_PORT}
-     */
-    public int getTcpRosServerPort() {
-        return tcpRosServerPort;
-    }
-
-    public void setTcpRosServerPort(int tcpRosServerPort) {
-        this.tcpRosServerPort = tcpRosServerPort;
-    }
-
-    /**
-     * Port for running Node server (XMLRPC server).
-     *
-     * <p>This server is used to negotiate connections with other ROS nodes and communicate with the
-     * Master.
-     *
-     * <p>JRosClient by default tries to use any available port starting from {@link
-     * START_NODE_SERVER_PORT}
-     */
-    public int getNodeServerPort() {
-        return nodeServerPort;
-    }
-
-    public void setNodeServerPort(int nodeServerPort) {
-        this.nodeServerPort = nodeServerPort;
-    }
-
-    /**
-     * Name of the host where TCPROS server and Node server will be running on. This host name
-     * should belong to the host where jrosclient is used and to which other ROS nodes can
-     * communicate.
-     *
-     * <p>Default value is {@link HOST_NAME}
-     */
-    public String getHostName() {
-        return hostName;
-    }
-
-    public void setHostName(String hostName) {
-        this.hostName = hostName;
-    }
-
-    /**
-     * Each instance of JRosClient acts as a separate ROS node and has a unique calledId which it
-     * reports to other ROS nodes.
-     */
-    public String getCallerId() {
-        return callerId;
-    }
-
-    /**
-     * Allows to limit length of logged variable length objects.
-     *
-     * <p>Example of such objects are ROS messages which may contain a lot of data which quickly
-     * fill up the logs. Setting maximum length will truncate logging of such objects.
-     *
-     * <p>Default value is -1 which means that truncation is off.
-     */
-    public void setMaxMessageLoggingLength(int length) {
-        this.maxMessageLoggingLength = length;
-    }
-
-    /** @see setMaxMessageLoggingLength */
-    public int getMaxMessageLoggingLength() {
-        return maxMessageLoggingLength;
-    }
-
-    public String getNodeApiUrl() {
-        return String.format("http://%s:%d", getHostName(), getNodeServerPort());
-    }
-
-    public void setCallerId(String callerId) {
-        this.callerId = callerId;
-    }
 }
