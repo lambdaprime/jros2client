@@ -80,7 +80,7 @@ public class JRos2ClientTests {
                         getSubscription().request(1);
                     }
                 });
-        ros2Commands.runTalker().forward();
+        ros2Commands.runTalker().forwardOutputAsync();
         Assertions.assertEquals("[0, 1, 2, 3, 4]", future.get().toString());
     }
 
@@ -99,16 +99,15 @@ public class JRos2ClientTests {
                             }
                         });
         var actual =
-                proc.stderr()
+                proc.stderrAsStream()
                         .peek(System.out::println)
                         .limit(10)
                         .map(
                                 line ->
                                         Integer.parseInt(
                                                 line.replaceAll(".*I heard: \\[(\\d*)\\]", "$1")))
-                        .sorted()
                         .collect(toList());
-        proc.flush(true);
+        proc.outputAsync(true);
         actual = reduceByFirst(actual);
         Assertions.assertEquals("[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]", actual.toString());
     }
