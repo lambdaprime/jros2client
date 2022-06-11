@@ -15,10 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package id.jros2client;
+package id.jros2client.impl;
 
-import id.jros2client.impl.ObjectsFactory;
-import id.jros2client.impl.Ros2NameMapper;
+import id.jros2client.JRos2ClientConfiguration;
 import id.jros2messages.MessageSerializationUtils;
 import id.jrosclient.JRosClient;
 import id.jrosclient.RosVersion;
@@ -55,7 +54,7 @@ public class JRos2Client implements JRosClient {
     private RtpsTalkClient rtpsTalkClient;
     private MessageSerializationUtils serializationUtils;
 
-    JRos2Client(JRos2ClientConfiguration config, ObjectsFactory factory) {
+    public JRos2Client(JRos2ClientConfiguration config, ObjectsFactory factory) {
         rtpsTalkClient = factory.createRtpsTalkClient();
         serializationUtils = factory.createMessageSerializationUtils();
         configuration = config;
@@ -113,5 +112,10 @@ public class JRos2Client implements JRosClient {
     public boolean hasPublisher(String topic) {
         new UnsupportedOperationException().printStackTrace();
         return false;
+    }
+
+    @SuppressWarnings("exports")
+    public RtpsTalkClient getRtpsTalkClient() {
+        return rtpsTalkClient;
     }
 }

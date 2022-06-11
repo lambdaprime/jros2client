@@ -17,6 +17,7 @@
  */
 package id.jros2client;
 
+import id.jros2client.impl.JRos2Client;
 import id.jros2client.impl.ObjectsFactory;
 import id.jrosclient.JRosClient;
 

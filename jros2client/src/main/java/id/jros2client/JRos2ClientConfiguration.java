@@ -17,6 +17,8 @@
  */
 package id.jros2client;
 
+import id.jros2client.impl.JRos2Client;
+
 /**
  * Configuration parameters of {@link JRos2Client}
  *

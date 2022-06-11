@@ -32,5 +32,6 @@ module jros2client {
 
     exports id.jros2client;
     exports id.jros2client.impl to
-            jrosclient.tests;
+            jrosclient.tests,
+            jros2services;
 }
