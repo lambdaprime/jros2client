@@ -15,34 +15,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package id.jros2client.tests.integration;
+package id.jros2client.tests.impl;
 
-import id.xfunction.lang.XExec;
-import id.xfunction.lang.XProcess;
-import java.util.ArrayList;
-import java.util.List;
+import id.jrosmessages.Message;
+import id.jrosmessages.MessageMetadata;
+import id.jrosmessages.RosInterfaceType;
 
 /**
  * @author lambdaprime intid@protonmail.com
  */
-public class Ros2Commands implements AutoCloseable {
+public class ServiceTestMessages {
 
-    private List<XProcess> procs = new ArrayList<>();
+    @MessageMetadata(
+            name = TestServiceRequestMessage.NAME,
+            interfaceType = RosInterfaceType.SERVICE)
+    public static class TestServiceRequestMessage implements Message {
 
-    public XProcess runTalker() {
-        var proc = new XExec("ros2 run demo_nodes_cpp talker").run();
-        procs.add(proc);
-        return proc;
+        static final String NAME = "test/TestServiceRequest";
     }
 
-    public XProcess runListener() {
-        var proc = new XExec("ros2 run demo_nodes_cpp listener").run();
-        procs.add(proc);
-        return proc;
-    }
+    @MessageMetadata(
+            name = TestServiceResponseMessage.NAME,
+            interfaceType = RosInterfaceType.SERVICE)
+    public class TestServiceResponseMessage implements Message {
 
-    @Override
-    public void close() {
-        procs.forEach(XProcess::destroyAllForcibly);
+        static final String NAME = "test/TestServiceResponse";
     }
 }

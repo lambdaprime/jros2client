@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 jros2client project
+ * Copyright 2020 jrosclient project
  * 
  * Website: https://github.com/lambdaprime/jros2client
  * 
@@ -17,7 +17,6 @@
  */
 package id.jros2client.impl;
 
-import id.jros2client.JRos2ClientConfiguration;
 import id.jros2messages.MessageSerializationUtils;
 import pinorobotics.rtpstalk.RtpsTalkClient;
 
@@ -25,10 +24,6 @@ import pinorobotics.rtpstalk.RtpsTalkClient;
 public class ObjectsFactory {
 
     private static ObjectsFactory instance = new ObjectsFactory();
-
-    public JRos2ClientConfiguration createConfig() {
-        return new JRos2ClientConfiguration();
-    }
 
     public RtpsTalkClient createRtpsTalkClient() {
         return new RtpsTalkClient();

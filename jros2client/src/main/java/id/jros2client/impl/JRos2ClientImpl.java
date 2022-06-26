@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 jros2client project
+ * Copyright 2020 jrosclient project
  * 
  * Website: https://github.com/lambdaprime/jros2client
  * 
@@ -17,13 +17,11 @@
  */
 package id.jros2client.impl;
 
-import id.jros2client.JRos2ClientConfiguration;
+import id.jros2client.JRos2Client;
 import id.jros2messages.MessageSerializationUtils;
-import id.jrosclient.JRosClient;
 import id.jrosclient.RosVersion;
 import id.jrosclient.TopicPublisher;
 import id.jrosclient.TopicSubscriber;
-import id.jrosclient.utils.RosNameUtils;
 import id.jrosmessages.Message;
 import id.xfunction.concurrent.SameThreadExecutorService;
 import id.xfunction.concurrent.flow.TransformProcessor;
@@ -35,6 +33,7 @@ import java.util.concurrent.Flow.Subscriber;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import pinorobotics.rtpstalk.RtpsTalkClient;
+import pinorobotics.rtpstalk.messages.RtpsTalkDataMessage;
 
 /**
  * Main class of the library which allows to interact with ROS.
@@ -43,21 +42,18 @@ import pinorobotics.rtpstalk.RtpsTalkClient;
  *
  * @author lambdaprime intid@protonmail.com
  */
-public class JRos2Client implements JRosClient {
-
-    private static final Ros2NameMapper rosNameMapper = new Ros2NameMapper(new RosNameUtils());
+public class JRos2ClientImpl implements JRos2Client {
 
     private final Logger LOGGER = XLogger.getLogger(this);
 
-    private String masterUrl;
-    private JRos2ClientConfiguration configuration;
+    private DdsNameMapper rosNameMapper;
     private RtpsTalkClient rtpsTalkClient;
     private MessageSerializationUtils serializationUtils;
 
-    public JRos2Client(JRos2ClientConfiguration config, ObjectsFactory factory) {
+    public JRos2ClientImpl(ObjectsFactory factory, DdsNameMapper namemapper) {
+        rosNameMapper = namemapper;
         rtpsTalkClient = factory.createRtpsTalkClient();
         serializationUtils = factory.createMessageSerializationUtils();
-        configuration = config;
     }
 
     @Override
@@ -68,9 +64,10 @@ public class JRos2Client implements JRosClient {
     @Override
     public <M extends Message> void subscribe(
             String topic, Class<M> messageClass, Subscriber<M> subscriber) throws Exception {
-        var messageName = rosNameMapper.asFullyQualifiedMessageName(messageClass);
-        topic = rosNameMapper.asFullyQualifiedTopicName(messageClass, topic);
-        Function<byte[], M> deserializer = input -> serializationUtils.read(input, messageClass);
+        var messageName = rosNameMapper.asFullyQualifiedDdsTypeName(messageClass);
+        topic = rosNameMapper.asFullyQualifiedDdsTopicName(messageClass, topic);
+        Function<RtpsTalkDataMessage, M> deserializer =
+                rtpsMessage -> serializationUtils.read(rtpsMessage.data(), messageClass);
         var transformer =
                 new TransformProcessor<>(deserializer, new SameThreadExecutorService(), 1);
         transformer.subscribe(subscriber);
@@ -85,9 +82,10 @@ public class JRos2Client implements JRosClient {
     @Override
     public <M extends Message> void publish(
             String topic, Class<M> messageClass, Publisher<M> publisher) throws Exception {
-        var messageName = rosNameMapper.asFullyQualifiedMessageName(messageClass);
-        topic = rosNameMapper.asFullyQualifiedTopicName(messageClass, topic);
-        Function<M, byte[]> serializer = input -> serializationUtils.write(input);
+        var messageName = rosNameMapper.asFullyQualifiedDdsTypeName(messageClass);
+        topic = rosNameMapper.asFullyQualifiedDdsTopicName(messageClass, topic);
+        Function<M, RtpsTalkDataMessage> serializer =
+                rosMessage -> new RtpsTalkDataMessage(serializationUtils.write(rosMessage));
         var transformer = new TransformProcessor<>(serializer, new SameThreadExecutorService(), 1);
         publisher.subscribe(transformer);
         rtpsTalkClient.publish(topic, messageName, transformer);

@@ -17,7 +17,7 @@ For signing add:
 
 plugins {
     id 'java'
-    id 'com.diffplug.spotless' version '6.3.0'
+    id 'com.diffplug.spotless' version '6.7.2'
 }
 
 allprojects {
@@ -28,6 +28,8 @@ allprojects {
 }
 
 subprojects {
+    apply plugin: 'java'
+    apply plugin: 'eclipse'
     sourceCompatibility = '17'
     targetCompatibility = '17'
 
@@ -42,7 +44,7 @@ subprojects {
           googleJavaFormat().aosp().reflowLongStrings()
 
           licenseHeader '''/*
- * Copyright $YEAR jros2client project
+ * Copyright $YEAR jrosclient project
  * 
  * Website: https://github.com/lambdaprime/jros2client
  * 

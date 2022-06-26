@@ -32,6 +32,9 @@ module jros2client {
 
     exports id.jros2client;
     exports id.jros2client.impl to
-            jrosclient.tests,
+            jros2client.tests,
+
+            // Services in ROS2 are based on custom form of DDS-RPC and therefore they
+            // need access to DDS logic
             jros2services;
 }

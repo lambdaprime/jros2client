@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 jros2client project
+ * Copyright 2020 jrosclient project
  * 
  * Website: https://github.com/lambdaprime/jros2client
  * 
@@ -17,9 +17,11 @@
  */
 package id.jros2client;
 
-import id.jros2client.impl.JRos2Client;
+import id.jros2client.impl.DdsNameMapper;
+import id.jros2client.impl.JRos2ClientImpl;
 import id.jros2client.impl.ObjectsFactory;
 import id.jrosclient.JRosClient;
+import id.jrosclient.utils.RosNameUtils;
 
 /**
  * Factory methods for {@link JRos2Client}
@@ -29,21 +31,18 @@ import id.jrosclient.JRosClient;
 public class JRos2ClientFactory {
 
     private static final ObjectsFactory objectsFactory = new ObjectsFactory();
+    private static final DdsNameMapper nameMapper = new DdsNameMapper(new RosNameUtils());
 
     /** Create client with default configuration */
     public JRosClient createJRosClient() {
         return createSpecializedJRos2Client();
     }
 
-    /** Creates client with given configuration */
-    public JRosClient createJRosClient(JRos2ClientConfiguration config) {
-        return createSpecializedJRos2Client(config);
-    }
-
-    /** @hidden visible for testing */
-    public JRosClient createJRosClient(
-            JRos2ClientConfiguration config, ObjectsFactory objectsFactory) {
-        return new JRos2Client(config, objectsFactory);
+    /**
+     * @hidden visible for testing
+     */
+    public JRosClient createJRosClient(ObjectsFactory objectsFactory) {
+        return new JRos2ClientImpl(objectsFactory, nameMapper);
     }
 
     /**
@@ -53,16 +52,6 @@ public class JRos2ClientFactory {
      * specific version of ROS which means that it will not work across all other ROS versions.
      */
     public JRos2Client createSpecializedJRos2Client() {
-        return new JRos2Client(objectsFactory.createConfig(), objectsFactory);
-    }
-
-    /**
-     * Creates specialized ROS2 client with given configuration
-     *
-     * <p>Specialized ROS clients ideally should be avoided since they make your code to rely on
-     * specific version of ROS which means that it will not work across all other ROS versions.
-     */
-    public JRos2Client createSpecializedJRos2Client(JRos2ClientConfiguration config) {
-        return new JRos2Client(config, objectsFactory);
+        return new JRos2ClientImpl(objectsFactory, nameMapper);
     }
 }

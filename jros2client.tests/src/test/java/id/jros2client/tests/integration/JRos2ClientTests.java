@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 jros2client project
+ * Copyright 2020 jrosclient project
  * 
  * Website: https://github.com/lambdaprime/jros2client
  * 
@@ -25,7 +25,6 @@ import id.jrosclient.TopicSubmissionPublisher;
 import id.jrosclient.TopicSubscriber;
 import id.jrosmessages.std_msgs.StringMessage;
 import id.xfunction.lang.XThread;
-import id.xfunction.logging.XLogger;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +44,7 @@ public class JRos2ClientTests {
 
     @BeforeAll
     public static void setupAll() {
-        XLogger.load("jros2client-test-logging.properties");
+        // XLogger.load("jros2client-test-logging.properties");
     }
 
     @BeforeEach
