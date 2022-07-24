@@ -35,6 +35,10 @@ public class Ros2Commands implements AutoCloseable {
         return proc;
     }
 
+    /**
+     * Listener with ROS2 default QoS profile (keeps only last 10 messages)
+     * https://docs.ros.org/en/rolling/Concepts/About-Quality-of-Service-Settings.html
+     */
     public XProcess runListener() {
         var proc = new XExec("ros2 run demo_nodes_cpp listener").run();
         procs.add(proc);

@@ -20,11 +20,13 @@
  */
 open module jros2client.tests {
     requires org.junit.jupiter.api;
+    requires org.junit.jupiter.params;
     requires jros2client;
     requires id.xfunction;
     requires id.kineticstreamer;
-    requires org.junit.jupiter.params;
-    requires org.junit.platform.commons;
     requires jrosclient;
+    requires jrosclient.tests;
     requires jrosmessages;
+
+    exports id.jros2client.tests.integration;
 }

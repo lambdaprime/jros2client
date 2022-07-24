@@ -5,8 +5,7 @@ plugins {
 apply plugin : 'eclipse'
 
 eclipse.classpath.file {
-    // because we disable inferModulePath later we intruct eclipse plugin
-    // to put everything to module path
+    // intruct eclipse plugin to put everything to module path
     whenMerged {
         entries.findAll { it.kind == 'lib' }.each { it.entryAttributes['module'] = 'true' }
     }
@@ -14,14 +13,19 @@ eclipse.classpath.file {
 
 dependencies {
     testImplementation project(':jros2client')
-    testImplementation('org.junit.jupiter:junit-jupiter-api:5.4.2')
-    testImplementation('org.junit.jupiter:junit-jupiter-params:5.4.2')
-    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.4.2')
-    testRuntimeOnly('org.junit.platform:junit-platform-commons:1.7.0')
+    testImplementation 'io.github.lambdaprime:jrosclient.tests:5.0-SNAPSHOT'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.4.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-commons:1.7.0'
 }
 
 test {
     useJUnitPlatform()
+
+    testLogging {
+        events "started", "failed"
+    }
 }
 
 // run spotless and format code before the build

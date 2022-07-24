@@ -25,6 +25,7 @@ import id.jrosclient.TopicSubmissionPublisher;
 import id.jrosclient.TopicSubscriber;
 import id.jrosmessages.std_msgs.StringMessage;
 import id.xfunction.lang.XThread;
+import id.xfunction.logging.XLogger;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +45,7 @@ public class JRos2ClientTests {
 
     @BeforeAll
     public static void setupAll() {
-        // XLogger.load("jros2client-test-logging.properties");
+        XLogger.load("jros2client-test-logging.properties");
     }
 
     @BeforeEach
@@ -107,8 +108,9 @@ public class JRos2ClientTests {
                                                 line.replaceAll(".*I heard: \\[(\\d*)\\]", "$1")))
                         .collect(toList());
         proc.outputAsync(true);
-        actual = reduceByFirst(actual);
-        Assertions.assertEquals("[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]", actual.toString());
+        for (int i = 1; i < actual.size(); i++) {
+            Assertions.assertTrue(actual.get(i - 1) < actual.get(i));
+        }
     }
 
     private List<Integer> reduceByFirst(List<Integer> buf) {
