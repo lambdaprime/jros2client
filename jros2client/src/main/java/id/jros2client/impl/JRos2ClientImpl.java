@@ -21,17 +21,13 @@ import id.jros2client.JRos2Client;
 import id.jros2messages.MessageSerializationUtils;
 import id.jrosclient.RosVersion;
 import id.jrosclient.TopicPublisher;
-import id.jrosclient.TopicSubscriber;
 import id.jrosmessages.Message;
 import id.xfunction.concurrent.SameThreadExecutorService;
 import id.xfunction.concurrent.flow.TransformProcessor;
-import id.xfunction.logging.XLogger;
 import java.io.IOException;
 import java.util.EnumSet;
-import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.function.Function;
-import java.util.logging.Logger;
 import pinorobotics.rtpstalk.RtpsTalkClient;
 import pinorobotics.rtpstalk.messages.RtpsTalkDataMessage;
 
@@ -44,8 +40,6 @@ import pinorobotics.rtpstalk.messages.RtpsTalkDataMessage;
  */
 public class JRos2ClientImpl implements JRos2Client {
 
-    private final Logger LOGGER = XLogger.getLogger(this);
-
     private DdsNameMapper rosNameMapper;
     private RtpsTalkClient rtpsTalkClient;
     private MessageSerializationUtils serializationUtils;
@@ -57,15 +51,10 @@ public class JRos2ClientImpl implements JRos2Client {
     }
 
     @Override
-    public <M extends Message> void subscribe(TopicSubscriber<M> subscriber) throws Exception {
-        subscribe(subscriber.getTopic(), subscriber.getMessageClass(), subscriber);
-    }
-
-    @Override
     public <M extends Message> void subscribe(
             String topic, Class<M> messageClass, Subscriber<M> subscriber) throws Exception {
         var messageName = rosNameMapper.asFullyQualifiedDdsTypeName(messageClass);
-        topic = rosNameMapper.asFullyQualifiedDdsTopicName(messageClass, topic);
+        topic = rosNameMapper.asFullyQualifiedDdsTopicName(topic, messageClass);
         Function<RtpsTalkDataMessage, M> deserializer =
                 rtpsMessage -> serializationUtils.read(rtpsMessage.data(), messageClass);
         var transformer =
@@ -76,14 +65,9 @@ public class JRos2ClientImpl implements JRos2Client {
 
     @Override
     public <M extends Message> void publish(TopicPublisher<M> publisher) throws Exception {
-        publish(publisher.getTopic(), publisher.getMessageClass(), publisher);
-    }
-
-    @Override
-    public <M extends Message> void publish(
-            String topic, Class<M> messageClass, Publisher<M> publisher) throws Exception {
+        var messageClass = publisher.getMessageClass();
         var messageName = rosNameMapper.asFullyQualifiedDdsTypeName(messageClass);
-        topic = rosNameMapper.asFullyQualifiedDdsTopicName(messageClass, topic);
+        var topic = rosNameMapper.asFullyQualifiedDdsTopicName(publisher.getTopic(), messageClass);
         Function<M, RtpsTalkDataMessage> serializer =
                 rosMessage -> new RtpsTalkDataMessage(serializationUtils.write(rosMessage));
         var transformer = new TransformProcessor<>(serializer, new SameThreadExecutorService(), 1);
@@ -92,7 +76,8 @@ public class JRos2ClientImpl implements JRos2Client {
     }
 
     @Override
-    public void unpublish(String topic) throws IOException {
+    public <M extends Message> void unpublish(String topic, Class<M> messageClass)
+            throws IOException {
         new UnsupportedOperationException().printStackTrace();
     }
 

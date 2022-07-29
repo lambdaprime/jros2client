@@ -52,7 +52,7 @@ public class DdsNameMapper {
 
     /** Returns DDS topic name */
     public <M extends Message> String asFullyQualifiedDdsTopicName(
-            Class<M> messageClass, String topicName) {
+            String topicName, Class<M> messageClass) {
         var rosAbsoluteTopicName = rosNameUtils.toAbsoluteName(topicName);
         var interfaceType = metadataAccessor.getInterfaceType(messageClass);
         var name = metadataAccessor.getName(messageClass);

@@ -34,19 +34,19 @@ public class DdsNameMapperTests {
         Assertions.assertEquals(
                 "rq/hello/_action/send_goalRequest",
                 mapper.asFullyQualifiedDdsTopicName(
-                        ActionTestMessages.TestActionGoalMessage.class, "hello"));
+                        "hello", ActionTestMessages.TestActionGoalMessage.class));
         Assertions.assertEquals(
                 "rr/hello/_action/get_resultReply",
                 mapper.asFullyQualifiedDdsTopicName(
-                        ActionTestMessages.TestActionResultMessage.class, "hello"));
+                        "hello", ActionTestMessages.TestActionResultMessage.class));
 
         Assertions.assertEquals(
                 "rq/helloRequest",
                 mapper.asFullyQualifiedDdsTopicName(
-                        ServiceTestMessages.TestServiceRequestMessage.class, "hello"));
+                        "hello", ServiceTestMessages.TestServiceRequestMessage.class));
         Assertions.assertEquals(
                 "rr/helloReply",
                 mapper.asFullyQualifiedDdsTopicName(
-                        ServiceTestMessages.TestServiceResponseMessage.class, "hello"));
+                        "hello", ServiceTestMessages.TestServiceResponseMessage.class));
     }
 }

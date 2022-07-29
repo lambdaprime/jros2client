@@ -16,8 +16,7 @@ plugins {
 apply plugin : 'eclipse'
 
 eclipse.classpath.file {
-    // because we disable inferModulePath later we intruct eclipse plugin
-    // to put everything to module path
+    // instruct eclipse plugin to put everything to module path
     whenMerged {
         entries.findAll { it.kind == 'lib' }.each { it.entryAttributes['module'] = 'true' }
     }
@@ -43,7 +42,6 @@ jar {
 }
 
 javadoc {
-    exclude 'id/jros2client/app/**'
     options.noTimestamp = true
     options.noQualifiers = ["all"]
     options.noTree = true
@@ -129,7 +127,7 @@ if (project.hasProperty('publish')) {
         pom {
           name = 'jros2client'
           description = 'Java module to interact with ROS 2 (Robot Operating System)'
-          url = 'http://portal2.atwebpages.com/jros2client'
+          url = 'http://portal2.atwebpages.com/jrosclient'
 
           licenses {
             license {

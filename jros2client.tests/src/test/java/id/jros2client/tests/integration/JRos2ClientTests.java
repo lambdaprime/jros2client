@@ -73,11 +73,11 @@ public class JRos2ClientTests {
                         var n = Integer.parseInt(item.data.substring("Hello World: ".length()));
                         buf.add(n);
                         if (buf.size() == 5) {
-                            getSubscription().cancel();
+                            getSubscription().get().cancel();
                             future.complete(reduceByFirst(buf));
                             return;
                         }
-                        getSubscription().request(1);
+                        getSubscription().get().request(1);
                     }
                 });
         ros2Commands.runTalker().forwardOutputAsync();
