@@ -50,7 +50,7 @@ public class JRos2ClientTests {
 
     @BeforeEach
     public void setup() throws MalformedURLException {
-        client = factory.createJRosClient();
+        client = factory.createClient();
         ros2Commands = new Ros2Commands();
     }
 

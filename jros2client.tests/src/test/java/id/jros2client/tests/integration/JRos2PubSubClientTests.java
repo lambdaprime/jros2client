@@ -32,7 +32,7 @@ public class JRos2PubSubClientTests extends JRosPubSubClientTests {
     private static final JRos2ClientFactory factory = new JRos2ClientFactory();
 
     static {
-        init(() -> factory.createJRosClient());
+        init(() -> factory.createClient());
     }
 
     @BeforeAll

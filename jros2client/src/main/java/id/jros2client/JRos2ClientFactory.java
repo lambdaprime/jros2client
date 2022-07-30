@@ -20,7 +20,6 @@ package id.jros2client;
 import id.jros2client.impl.DdsNameMapper;
 import id.jros2client.impl.JRos2ClientImpl;
 import id.jros2client.impl.ObjectsFactory;
-import id.jrosclient.JRosClient;
 import id.jrosclient.utils.RosNameUtils;
 
 /**
@@ -34,24 +33,14 @@ public class JRos2ClientFactory {
     private static final DdsNameMapper nameMapper = new DdsNameMapper(new RosNameUtils());
 
     /** Create client with default configuration */
-    public JRosClient createJRosClient() {
-        return createSpecializedJRos2Client();
+    public JRos2Client createClient() {
+        return new JRos2ClientImpl(objectsFactory, nameMapper);
     }
 
     /**
      * @hidden visible for testing
      */
-    public JRosClient createJRosClient(ObjectsFactory objectsFactory) {
-        return new JRos2ClientImpl(objectsFactory, nameMapper);
-    }
-
-    /**
-     * Create specialized ROS2 client with default configuration.
-     *
-     * <p>Specialized ROS clients ideally should be avoided since they make your code to rely on
-     * specific version of ROS which means that it will not work across all other ROS versions.
-     */
-    public JRos2Client createSpecializedJRos2Client() {
+    public JRos2Client createClient(ObjectsFactory objectsFactory) {
         return new JRos2ClientImpl(objectsFactory, nameMapper);
     }
 }
