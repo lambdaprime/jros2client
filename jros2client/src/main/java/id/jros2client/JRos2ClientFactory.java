@@ -29,18 +29,15 @@ import id.jrosclient.utils.RosNameUtils;
  */
 public class JRos2ClientFactory {
 
-    private static final ObjectsFactory objectsFactory = new ObjectsFactory();
-    private static final DdsNameMapper nameMapper = new DdsNameMapper(new RosNameUtils());
+    private static final ObjectsFactory OBJECTS_FACTORY = new ObjectsFactory();
+    private static final DdsNameMapper NAME_MAPPER = new DdsNameMapper(new RosNameUtils());
 
     /** Create client with default configuration */
     public JRos2Client createClient() {
-        return new JRos2ClientImpl(objectsFactory, nameMapper);
+        return createClient(new JRos2ClientConfiguration.Builder().build());
     }
 
-    /**
-     * @hidden visible for testing
-     */
-    public JRos2Client createClient(ObjectsFactory objectsFactory) {
-        return new JRos2ClientImpl(objectsFactory, nameMapper);
+    public JRos2Client createClient(JRos2ClientConfiguration config) {
+        return new JRos2ClientImpl(config, OBJECTS_FACTORY, NAME_MAPPER);
     }
 }

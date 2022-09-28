@@ -19,14 +19,15 @@ package id.jros2client.impl;
 
 import id.jros2messages.MessageSerializationUtils;
 import pinorobotics.rtpstalk.RtpsTalkClient;
+import pinorobotics.rtpstalk.RtpsTalkConfiguration;
 
 /** This factory is a single point for managing all dependencies. */
 public class ObjectsFactory {
 
     private static ObjectsFactory instance = new ObjectsFactory();
 
-    public RtpsTalkClient createRtpsTalkClient() {
-        return new RtpsTalkClient();
+    public RtpsTalkClient createRtpsTalkClient(RtpsTalkConfiguration config) {
+        return new RtpsTalkClient(config);
     }
 
     public static ObjectsFactory getInstance() {

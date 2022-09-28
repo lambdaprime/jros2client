@@ -28,7 +28,7 @@ module jros2client {
     requires java.logging;
     requires transitive jrosclient;
     requires transitive jros2messages;
-    requires rtpstalk;
+    requires transitive rtpstalk;
 
     exports id.jros2client;
     exports id.jros2client.impl to

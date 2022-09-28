@@ -18,6 +18,7 @@
 package id.jros2client.impl;
 
 import id.jros2client.JRos2Client;
+import id.jros2client.JRos2ClientConfiguration;
 import id.jros2messages.MessageSerializationUtils;
 import id.jrosclient.RosVersion;
 import id.jrosclient.TopicPublisher;
@@ -49,9 +50,10 @@ public class JRos2ClientImpl implements JRos2Client {
     private TracingToken tracingToken;
     private XLogger logger;
 
-    public JRos2ClientImpl(ObjectsFactory factory, DdsNameMapper namemapper) {
+    public JRos2ClientImpl(
+            JRos2ClientConfiguration config, ObjectsFactory factory, DdsNameMapper namemapper) {
         rosNameMapper = namemapper;
-        rtpsTalkClient = factory.createRtpsTalkClient();
+        rtpsTalkClient = factory.createRtpsTalkClient(config.rtpsTalkConfiguration());
         serializationUtils = factory.createMessageSerializationUtils();
         tracingToken = new TracingToken("" + hashCode());
         logger = XLogger.getLogger(getClass(), tracingToken);
