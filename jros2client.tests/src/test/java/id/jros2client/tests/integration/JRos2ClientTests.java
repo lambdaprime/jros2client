@@ -19,14 +19,20 @@ package id.jros2client.tests.integration;
 
 import static java.util.stream.Collectors.toList;
 
+import id.jros2client.JRos2ClientConfiguration;
 import id.jros2client.JRos2ClientFactory;
+import id.jros2messages.MessageSerializationUtils;
+import id.jros2messages.sensor_msgs.ImageMessage;
 import id.jrosclient.JRosClient;
 import id.jrosclient.TopicSubmissionPublisher;
 import id.jrosclient.TopicSubscriber;
 import id.jrosmessages.std_msgs.StringMessage;
+import id.xfunction.concurrent.flow.FixedCollectorSubscriber;
 import id.xfunction.lang.XThread;
 import id.xfunction.logging.XLogger;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -36,6 +42,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import pinorobotics.rtpstalk.RtpsTalkConfiguration;
 
 public class JRos2ClientTests {
 
@@ -110,6 +117,55 @@ public class JRos2ClientTests {
         proc.outputAsync(true);
         for (int i = 1; i < actual.size(); i++) {
             Assertions.assertTrue(actual.get(i - 1) < actual.get(i));
+        }
+    }
+
+    /**
+     * Test that:
+     *
+     * <ul>
+     *   <li>messages over 1mb are fragmented
+     *   <li>publisher can support multiple subscribers with different DURABILITY (rqt has
+     *       BEST_EFFORT)
+     *   <li>when history cache runs out we clean it up after RELIABLE Readers ack the changes
+     * </ul>
+     *
+     * <p>To complete the test user suppose to close rqt window only when image is displayed
+     */
+    @Test
+    public void test_publish_message_over_1Mb() throws Exception {
+        var message =
+                new MessageSerializationUtils()
+                        .read(
+                                Files.readAllBytes(
+                                        Paths.get("samples/ImageMessage/seattle_ImageMessage.bin")),
+                                ImageMessage.class);
+        var proc = ros2Commands.runRqt();
+        try (var publisherClient =
+                        factory.createClient(
+                                new JRos2ClientConfiguration.Builder()
+                                        .rtpsTalkConfiguration(
+                                                new RtpsTalkConfiguration.Builder()
+                                                        .historyCacheMaxSize(3)
+                                                        .build())
+                                        .build());
+                var subscriberClient = factory.createClient(); ) {
+            String topic = "testTopic1";
+            var publisher = new TopicSubmissionPublisher<>(ImageMessage.class, topic);
+            publisherClient.publish(publisher);
+            var collector = new FixedCollectorSubscriber<>(new ArrayList<ImageMessage>(), 8);
+            subscriberClient.subscribe(topic, ImageMessage.class, collector);
+            ForkJoinPool.commonPool()
+                    .execute(
+                            () -> {
+                                while (!collector.getFuture().isDone()) {
+                                    publisher.submit(message);
+                                }
+                            });
+            proc.await();
+            var actual = collector.getFuture().get();
+            Assertions.assertEquals(8, actual.size());
+            Assertions.assertEquals(message, actual.get(0));
         }
     }
 

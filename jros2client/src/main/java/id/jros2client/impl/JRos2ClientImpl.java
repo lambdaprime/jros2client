@@ -34,6 +34,9 @@ import java.util.concurrent.Flow.Subscriber;
 import java.util.function.Function;
 import pinorobotics.rtpstalk.RtpsTalkClient;
 import pinorobotics.rtpstalk.messages.RtpsTalkDataMessage;
+import pinorobotics.rtpstalk.qos.DurabilityType;
+import pinorobotics.rtpstalk.qos.PublisherQosPolicy;
+import pinorobotics.rtpstalk.qos.ReliabilityType;
 
 /**
  * Main class of the library which allows to interact with ROS.
@@ -43,6 +46,17 @@ import pinorobotics.rtpstalk.messages.RtpsTalkDataMessage;
  * @author lambdaprime intid@protonmail.com
  */
 public class JRos2ClientImpl implements JRos2Client {
+
+    /**
+     * From http://design.ros2.org/articles/qos.html:
+     *
+     * <p>In order to make the transition from ROS 1 to ROS 2, exercising a similar network behavior
+     * is desirable. By default, publishers and subscriptions are reliable in ROS 2, have volatile
+     * durability, and keep last history.
+     */
+    private static final PublisherQosPolicy DEFAULT_PUBLISHER_QOS =
+            new PublisherQosPolicy(
+                    ReliabilityType.RELIABLE, DurabilityType.VOLATILE_DURABILITY_QOS);
 
     private DdsNameMapper rosNameMapper;
     private RtpsTalkClient rtpsTalkClient;
@@ -93,7 +107,7 @@ public class JRos2ClientImpl implements JRos2Client {
                         Optional.of(new RtpsTalkDataMessage(serializationUtils.write(rosMessage)));
         var transformer = new TransformProcessor<>(serializer, new SameThreadExecutorService(), 1);
         publisher.subscribe(transformer);
-        rtpsTalkClient.publish(topic, messageName, transformer);
+        rtpsTalkClient.publish(topic, messageName, DEFAULT_PUBLISHER_QOS, transformer);
     }
 
     @Override

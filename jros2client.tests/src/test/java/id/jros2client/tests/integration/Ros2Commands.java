@@ -45,6 +45,12 @@ public class Ros2Commands implements AutoCloseable {
         return proc;
     }
 
+    public XProcess runRqt() {
+        var proc = new XExec("rqt").run();
+        procs.add(proc);
+        return proc;
+    }
+
     @Override
     public void close() {
         procs.forEach(XProcess::destroyAllForcibly);

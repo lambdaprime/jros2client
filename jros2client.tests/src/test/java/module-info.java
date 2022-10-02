@@ -27,6 +27,7 @@ open module jros2client.tests {
     requires jrosclient;
     requires jrosclient.tests;
     requires jrosmessages;
+    requires jros2messages;
 
     exports id.jros2client.tests.integration;
 }

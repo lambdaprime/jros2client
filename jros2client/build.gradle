@@ -31,7 +31,7 @@ dependencies {
     // transitively export following dependency to tests project
     apiElements 'io.github.lambdaprime:jrosclient:5.0-SNAPSHOT'
     apiElements 'io.github.lambdaprime:jros2messages:1.0-SNAPSHOT'
-    apiElements 'io.github.lambdaprime:id.xfunction:18.0'
+    apiElements 'io.github.lambdaprime:id.xfunction:19.0-SNAPSHOT'
     apiElements 'io.github.pinorobotics:rtpstalk:2.0-SNAPSHOT'
 }
 
