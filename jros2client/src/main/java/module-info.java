@@ -31,6 +31,8 @@ module jros2client {
     requires transitive rtpstalk;
 
     exports id.jros2client;
+    exports id.jros2client.impl.rmw to
+            jros2client.tests;
     exports id.jros2client.impl to
             jros2client.tests,
 

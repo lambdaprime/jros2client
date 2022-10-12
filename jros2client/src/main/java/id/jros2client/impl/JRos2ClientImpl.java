@@ -19,7 +19,7 @@ package id.jros2client.impl;
 
 import id.jros2client.JRos2Client;
 import id.jros2client.JRos2ClientConfiguration;
-import id.jros2messages.MessageSerializationUtils;
+import id.jros2client.impl.rmw.DdsNameMapper;
 import id.jrosclient.RosVersion;
 import id.jrosclient.TopicPublisher;
 import id.jrosmessages.Message;
@@ -27,13 +27,11 @@ import id.xfunction.concurrent.SameThreadExecutorService;
 import id.xfunction.concurrent.flow.TransformProcessor;
 import id.xfunction.logging.TracingToken;
 import id.xfunction.logging.XLogger;
+import id.xfunction.util.LazyService;
 import java.io.IOException;
 import java.util.EnumSet;
-import java.util.Optional;
 import java.util.concurrent.Flow.Subscriber;
-import java.util.function.Function;
 import pinorobotics.rtpstalk.RtpsTalkClient;
-import pinorobotics.rtpstalk.messages.RtpsTalkDataMessage;
 import pinorobotics.rtpstalk.qos.DurabilityType;
 import pinorobotics.rtpstalk.qos.PublisherQosPolicy;
 import pinorobotics.rtpstalk.qos.ReliabilityType;
@@ -45,7 +43,7 @@ import pinorobotics.rtpstalk.qos.ReliabilityType;
  *
  * @author lambdaprime intid@protonmail.com
  */
-public class JRos2ClientImpl implements JRos2Client {
+public class JRos2ClientImpl extends LazyService implements JRos2Client {
 
     /**
      * From http://design.ros2.org/articles/qos.html:
@@ -60,15 +58,16 @@ public class JRos2ClientImpl implements JRos2Client {
 
     private DdsNameMapper rosNameMapper;
     private RtpsTalkClient rtpsTalkClient;
-    private MessageSerializationUtils serializationUtils;
     private TracingToken tracingToken;
     private XLogger logger;
+    private MessageUtils messageUtils;
+    private JRos2ClientConfiguration config;
 
-    public JRos2ClientImpl(
-            JRos2ClientConfiguration config, ObjectsFactory factory, DdsNameMapper namemapper) {
-        rosNameMapper = namemapper;
+    public JRos2ClientImpl(JRos2ClientConfiguration config, ObjectsFactory factory) {
+        this.config = config;
+        this.messageUtils = factory.createMessageUtils();
+        rosNameMapper = factory.createNameMapper();
         rtpsTalkClient = factory.createRtpsTalkClient(config.rtpsTalkConfiguration());
-        serializationUtils = factory.createMessageSerializationUtils();
         tracingToken = new TracingToken("" + hashCode());
         logger = XLogger.getLogger(getClass(), tracingToken);
     }
@@ -76,36 +75,31 @@ public class JRos2ClientImpl implements JRos2Client {
     @Override
     public <M extends Message> void subscribe(
             String topic, Class<M> messageClass, Subscriber<M> subscriber) throws Exception {
+        startLazy();
         logger.fine("Subscribing to {0} type {1}", topic, messageClass.getName());
         var messageName = rosNameMapper.asFullyQualifiedDdsTypeName(messageClass);
         topic = rosNameMapper.asFullyQualifiedDdsTopicName(topic, messageClass);
-        Function<RtpsTalkDataMessage, Optional<M>> deserializer =
-                rtpsMessage -> {
-                    var data = rtpsMessage.data().orElse(null);
-                    if (data == null) {
-                        logger.warning("Received empty RTPS Data message, ignoring");
-                        return Optional.empty();
-                    }
-                    return Optional.of(serializationUtils.read(data, messageClass));
-                };
         var transformer =
-                new TransformProcessor<>(deserializer, new SameThreadExecutorService(), 1);
+                new TransformProcessor<>(
+                        messageUtils.deserializer(messageClass),
+                        new SameThreadExecutorService(),
+                        1);
         transformer.subscribe(subscriber);
         rtpsTalkClient.subscribe(topic, messageName, transformer);
     }
 
     @Override
     public <M extends Message> void publish(TopicPublisher<M> publisher) throws Exception {
+        startLazy();
         logger.fine(
                 "Publishing to {0} type {1}",
                 publisher.getTopic(), publisher.getMessageClass().getName());
         var messageClass = publisher.getMessageClass();
         var messageName = rosNameMapper.asFullyQualifiedDdsTypeName(messageClass);
         var topic = rosNameMapper.asFullyQualifiedDdsTopicName(publisher.getTopic(), messageClass);
-        Function<M, Optional<RtpsTalkDataMessage>> serializer =
-                rosMessage ->
-                        Optional.of(new RtpsTalkDataMessage(serializationUtils.write(rosMessage)));
-        var transformer = new TransformProcessor<>(serializer, new SameThreadExecutorService(), 1);
+        var transformer =
+                new TransformProcessor<>(
+                        messageUtils.serializer(), new SameThreadExecutorService(), 1);
         publisher.subscribe(transformer);
         rtpsTalkClient.publish(topic, messageName, DEFAULT_PUBLISHER_QOS, transformer);
     }
@@ -114,12 +108,6 @@ public class JRos2ClientImpl implements JRos2Client {
     public <M extends Message> void unpublish(String topic, Class<M> messageClass)
             throws IOException {
         new UnsupportedOperationException().printStackTrace();
-    }
-
-    @Override
-    public void close() {
-        logger.fine("Close");
-        rtpsTalkClient.close();
     }
 
     @Override
@@ -136,5 +124,21 @@ public class JRos2ClientImpl implements JRos2Client {
     @SuppressWarnings("exports")
     public RtpsTalkClient getRtpsTalkClient() {
         return rtpsTalkClient;
+    }
+
+    @Override
+    protected void onStart() {
+        logger.fine("onStart");
+    }
+
+    @Override
+    protected void onClose() {
+        logger.fine("Close");
+        rtpsTalkClient.close();
+    }
+
+    @Override
+    public JRos2ClientConfiguration getConfiguration() {
+        return config;
     }
 }

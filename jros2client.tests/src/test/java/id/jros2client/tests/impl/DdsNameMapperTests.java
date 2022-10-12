@@ -17,7 +17,7 @@
  */
 package id.jros2client.tests.impl;
 
-import id.jros2client.impl.DdsNameMapper;
+import id.jros2client.impl.rmw.DdsNameMapper;
 import id.jrosclient.utils.RosNameUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

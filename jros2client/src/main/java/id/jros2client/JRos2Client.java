@@ -22,4 +22,7 @@ import id.jrosclient.JRosClient;
 /**
  * @author lambdaprime intid@protonmail.com
  */
-public interface JRos2Client extends JRosClient {}
+public interface JRos2Client extends JRosClient {
+
+    JRos2ClientConfiguration getConfiguration();
+}

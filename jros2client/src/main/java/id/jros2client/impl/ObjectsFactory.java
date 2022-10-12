@@ -17,11 +17,17 @@
  */
 package id.jros2client.impl;
 
+import id.jros2client.impl.rmw.DdsNameMapper;
 import id.jros2messages.MessageSerializationUtils;
+import id.jrosclient.utils.RosNameUtils;
 import pinorobotics.rtpstalk.RtpsTalkClient;
 import pinorobotics.rtpstalk.RtpsTalkConfiguration;
 
-/** This factory is a single point for managing all dependencies. */
+/**
+ * This factory is a single point for managing all dependencies.
+ *
+ * @author lambdaprime intid@protonmail.com
+ */
 public class ObjectsFactory {
 
     private static ObjectsFactory instance = new ObjectsFactory();
@@ -38,7 +44,11 @@ public class ObjectsFactory {
         instance = objectsFactory;
     }
 
-    public MessageSerializationUtils createMessageSerializationUtils() {
-        return new MessageSerializationUtils();
+    public MessageUtils createMessageUtils() {
+        return new MessageUtils(new MessageSerializationUtils());
+    }
+
+    public DdsNameMapper createNameMapper() {
+        return new DdsNameMapper(new RosNameUtils());
     }
 }

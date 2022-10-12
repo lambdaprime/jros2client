@@ -19,14 +19,15 @@ package id.jros2client.tests.integration;
 
 import static java.util.stream.Collectors.toList;
 
+import id.jros2client.JRos2Client;
 import id.jros2client.JRos2ClientConfiguration;
 import id.jros2client.JRos2ClientFactory;
 import id.jros2messages.MessageSerializationUtils;
 import id.jros2messages.sensor_msgs.ImageMessage;
-import id.jrosclient.JRosClient;
 import id.jrosclient.TopicSubmissionPublisher;
 import id.jrosclient.TopicSubscriber;
 import id.jrosmessages.std_msgs.StringMessage;
+import id.xfunction.AssertRunCommand;
 import id.xfunction.concurrent.flow.FixedCollectorSubscriber;
 import id.xfunction.lang.XThread;
 import id.xfunction.logging.XLogger;
@@ -44,11 +45,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import pinorobotics.rtpstalk.RtpsTalkConfiguration;
 
+/**
+ * @author lambdaprime intid@protonmail.com
+ */
 public class JRos2ClientTests {
 
     private static final JRos2ClientFactory factory = new JRos2ClientFactory();
     private static Ros2Commands ros2Commands;
-    private static JRosClient client;
+    private static JRos2Client client;
 
     @BeforeAll
     public static void setupAll() {
@@ -93,7 +97,8 @@ public class JRos2ClientTests {
 
     @Test
     public void test_publish_happy() throws Exception {
-        var publisher = new TopicSubmissionPublisher<>(StringMessage.class, "chatter");
+        var topicName = "/chatter";
+        var publisher = new TopicSubmissionPublisher<>(StringMessage.class, topicName);
         client.publish(publisher);
         var proc = ros2Commands.runListener();
         ForkJoinPool.commonPool()
@@ -114,10 +119,28 @@ public class JRos2ClientTests {
                                         Integer.parseInt(
                                                 line.replaceAll(".*I heard: \\[(\\d*)\\]", "$1")))
                         .collect(toList());
-        proc.outputAsync(true);
         for (int i = 1; i < actual.size(); i++) {
             Assertions.assertTrue(actual.get(i - 1) < actual.get(i));
         }
+        new AssertRunCommand(
+                        "ros2",
+                        "topic",
+                        "info",
+                        "--spin-time",
+                        ""
+                                + client.getConfiguration()
+                                                .rtpsTalkConfiguration()
+                                                .spdpDiscoveredParticipantDataPublishPeriod()
+                                                .toSeconds()
+                                        * 2,
+                        "-v",
+                        "--no-daemon",
+                        topicName)
+                .withOutputConsumer(System.out::println)
+                .assertOutputFromResource("test_publish_happy")
+                .withWildcardMatching()
+                .assertReturnCode(0)
+                .run();
     }
 
     /**

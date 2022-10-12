@@ -17,10 +17,8 @@
  */
 package id.jros2client;
 
-import id.jros2client.impl.DdsNameMapper;
 import id.jros2client.impl.JRos2ClientImpl;
 import id.jros2client.impl.ObjectsFactory;
-import id.jrosclient.utils.RosNameUtils;
 
 /**
  * Factory methods for {@link JRos2Client}
@@ -30,7 +28,6 @@ import id.jrosclient.utils.RosNameUtils;
 public class JRos2ClientFactory {
 
     private static final ObjectsFactory OBJECTS_FACTORY = new ObjectsFactory();
-    private static final DdsNameMapper NAME_MAPPER = new DdsNameMapper(new RosNameUtils());
 
     /** Create client with default configuration */
     public JRos2Client createClient() {
@@ -38,6 +35,6 @@ public class JRos2ClientFactory {
     }
 
     public JRos2Client createClient(JRos2ClientConfiguration config) {
-        return new JRos2ClientImpl(config, OBJECTS_FACTORY, NAME_MAPPER);
+        return new JRos2ClientImpl(config, OBJECTS_FACTORY);
     }
 }
