@@ -20,6 +20,7 @@ package id.jros2client.impl;
 import id.jros2client.JRos2Client;
 import id.jros2client.JRos2ClientConfiguration;
 import id.jros2client.impl.rmw.DdsNameMapper;
+import id.jros2client.impl.rmw.RmwConstants;
 import id.jrosclient.RosVersion;
 import id.jrosclient.TopicPublisher;
 import id.jrosmessages.Message;
@@ -32,10 +33,6 @@ import java.io.IOException;
 import java.util.EnumSet;
 import java.util.concurrent.Flow.Subscriber;
 import pinorobotics.rtpstalk.RtpsTalkClient;
-import pinorobotics.rtpstalk.qos.DurabilityType;
-import pinorobotics.rtpstalk.qos.PublisherQosPolicy;
-import pinorobotics.rtpstalk.qos.ReliabilityType;
-import pinorobotics.rtpstalk.qos.SubscriberQosPolicy;
 
 /**
  * Main class of the library which allows to interact with ROS.
@@ -45,28 +42,6 @@ import pinorobotics.rtpstalk.qos.SubscriberQosPolicy;
  * @author lambdaprime intid@protonmail.com
  */
 public class JRos2ClientImpl extends LazyService implements JRos2Client {
-
-    /**
-     * From http://design.ros2.org/articles/qos.html:
-     *
-     * <p>In order to make the transition from ROS 1 to ROS 2, exercising a similar network behavior
-     * is desirable. By default, publishers and subscriptions are reliable in ROS 2, have volatile
-     * durability, and keep last history.
-     */
-    private static final PublisherQosPolicy DEFAULT_PUBLISHER_QOS =
-            new PublisherQosPolicy(
-                    ReliabilityType.RELIABLE, DurabilityType.VOLATILE_DURABILITY_QOS);
-
-    /**
-     * From http://design.ros2.org/articles/qos.html:
-     *
-     * <p>In order to make the transition from ROS 1 to ROS 2, exercising a similar network behavior
-     * is desirable. By default, publishers and subscriptions are reliable in ROS 2, have volatile
-     * durability, and keep last history.
-     */
-    private static final SubscriberQosPolicy DEFAULT_SUBSCRIBER_QOS =
-            new SubscriberQosPolicy(
-                    ReliabilityType.RELIABLE, DurabilityType.VOLATILE_DURABILITY_QOS);
 
     private DdsNameMapper rosNameMapper;
     private RtpsTalkClient rtpsTalkClient;
@@ -97,7 +72,8 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
                         new SameThreadExecutorService(),
                         1);
         transformer.subscribe(subscriber);
-        rtpsTalkClient.subscribe(topic, messageName, DEFAULT_SUBSCRIBER_QOS, transformer);
+        rtpsTalkClient.subscribe(
+                topic, messageName, RmwConstants.DEFAULT_SUBSCRIBER_QOS, transformer);
     }
 
     @Override
@@ -113,7 +89,7 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
                 new TransformProcessor<>(
                         messageUtils.serializer(), new SameThreadExecutorService(), 1);
         publisher.subscribe(transformer);
-        rtpsTalkClient.publish(topic, messageName, DEFAULT_PUBLISHER_QOS, transformer);
+        rtpsTalkClient.publish(topic, messageName, RmwConstants.DEFAULT_PUBLISHER_QOS, transformer);
     }
 
     @Override
