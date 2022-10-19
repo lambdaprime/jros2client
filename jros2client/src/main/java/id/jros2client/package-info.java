@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 /**
- * Main package of <b>jrosclient</b> which provides functionality for working with ROS from Java
+ * Main package of <b>jros2client</b> which provides functionality for working with ROS2 from Java
  *
  * @author lambdaprime intid@protonmail.com
  */

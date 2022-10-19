@@ -27,7 +27,8 @@ allprojects {
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'eclipse'
+    apply plugin : 'eclipse'
+
     sourceCompatibility = '17'
     targetCompatibility = '17'
 
@@ -67,7 +68,7 @@ subprojects {
 }
 
 ext {
-    releaseFileName = "${projectName}-${version}.zip"
+    releaseFileName = "${projectName}-v${version}.zip"
 }
 
 // gradlew requires execution of gradle-wrapper.jar which trustworthy needs to

@@ -9,7 +9,6 @@ buildscript {
 }
 
 plugins {
-    id 'java'
     id 'com.diffplug.spotless'
 }
 
@@ -23,16 +22,16 @@ eclipse.classpath.file {
 }
 
 dependencies {
-    implementation 'io.github.lambdaprime:jrosclient:5.0-SNAPSHOT'
-    implementation 'io.github.lambdaprime:jros2messages:1.0-SNAPSHOT'
-    implementation 'io.github.lambdaprime:id.xfunction:19.0-SNAPSHOT'
-    implementation 'io.github.pinorobotics:rtpstalk:2.0-SNAPSHOT'
+    implementation 'io.github.lambdaprime:jrosclient:5.0'
+    implementation 'io.github.lambdaprime:jros2messages:1.0'
+    implementation 'io.github.lambdaprime:id.xfunction:19.0'
+    implementation 'io.github.pinorobotics:rtpstalk:2.0'
 
     // transitively export following dependency to tests project
-    apiElements 'io.github.lambdaprime:jrosclient:5.0-SNAPSHOT'
-    apiElements 'io.github.lambdaprime:jros2messages:1.0-SNAPSHOT'
-    apiElements 'io.github.lambdaprime:id.xfunction:19.0-SNAPSHOT'
-    apiElements 'io.github.pinorobotics:rtpstalk:2.0-SNAPSHOT'
+    apiElements 'io.github.lambdaprime:jrosclient:5.0'
+    apiElements 'io.github.lambdaprime:jros2messages:1.0'
+    apiElements 'io.github.lambdaprime:id.xfunction:19.0'
+    apiElements 'io.github.pinorobotics:rtpstalk:2.0'
 }
 
 jar {
@@ -49,6 +48,7 @@ javadoc {
     options.noNavBar = true
     // ignore missing @return, @param etc
     options.addBooleanOption('Xdoclint:all,-missing', true)
+    exclude 'id/jros2client/impl/**'
 }
 
 def packageDir = "$buildDir/package/${projectName}"
@@ -68,7 +68,6 @@ task copyLibs(type: Copy) {
 task createPackage(type: Copy, dependsOn: [copyLibs]) {
     from "${project.rootDir}/README.md"
     from "${project.rootDir}/LICENSE-2.0.txt"
-    from file("$projectDir/src/jros2client")
     into packageDir
 }
 
