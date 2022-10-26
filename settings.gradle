@@ -1,2 +1,3 @@
 include 'jros2client'
+include 'jros2client.examples'
 include 'jros2client.tests'
