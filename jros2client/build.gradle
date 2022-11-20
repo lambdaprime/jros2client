@@ -25,13 +25,13 @@ dependencies {
     implementation 'io.github.lambdaprime:jrosclient:5.0'
     implementation 'io.github.lambdaprime:jros2messages:1.0'
     implementation 'io.github.lambdaprime:id.xfunction:19.0'
-    implementation 'io.github.pinorobotics:rtpstalk:2.0'
+    implementation 'io.github.pinorobotics:rtpstalk:3.0-SNAPSHOT'
 
     // transitively export following dependency to tests project
     apiElements 'io.github.lambdaprime:jrosclient:5.0'
     apiElements 'io.github.lambdaprime:jros2messages:1.0'
     apiElements 'io.github.lambdaprime:id.xfunction:19.0'
-    apiElements 'io.github.pinorobotics:rtpstalk:2.0'
+    apiElements 'io.github.pinorobotics:rtpstalk:3.0-SNAPSHOT'
 }
 
 jar {
