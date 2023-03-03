@@ -1,78 +1,80 @@
 // include xfunction for updateVersion
 buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "io.github.lambdaprime:id.xfunction:14.0"
-    }
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath "io.github.lambdaprime:id.xfunction:14.0"
+  }
 }
 
 plugins {
-    id 'com.diffplug.spotless'
+  id 'com.diffplug.spotless'
 }
 
 apply plugin : 'eclipse'
 
 eclipse.classpath.file {
-    // instruct eclipse plugin to put everything to module path
-    whenMerged {
-        entries.findAll { it.kind == 'lib' }.each { it.entryAttributes['module'] = 'true' }
-    }
+  // instruct eclipse plugin to put everything to module path
+  whenMerged {
+    entries.findAll { it.kind == 'lib' }.each { it.entryAttributes['module'] = 'true' }
+  }
 }
 
 dependencies {
-    implementation 'io.github.lambdaprime:jrosclient:5.0'
-    implementation 'io.github.lambdaprime:jros2messages:1.0'
-    implementation 'io.github.lambdaprime:id.xfunction:19.0'
-    implementation 'io.github.pinorobotics:rtpstalk:3.0-SNAPSHOT'
-
-    // transitively export following dependency to tests project
-    apiElements 'io.github.lambdaprime:jrosclient:5.0'
-    apiElements 'io.github.lambdaprime:jros2messages:1.0'
-    apiElements 'io.github.lambdaprime:id.xfunction:19.0'
-    apiElements 'io.github.pinorobotics:rtpstalk:3.0-SNAPSHOT'
+  addDependencies(this, ["implementation", "apiElements"], "6.0-SNAPSHOT", [
+    "io.github.lambdaprime:jrosclient"
+  ]);
+  addDependencies(this, ["implementation", "apiElements"], "2.0-SNAPSHOT", [
+    "io.github.lambdaprime:jros2messages"
+  ]);
+  addDependencies(this, ["implementation", "apiElements"], "20.0", [
+    "io.github.lambdaprime:id.xfunction"
+  ]);
+  addDependencies(this, ["implementation", "apiElements"], "3.0-SNAPSHOT", [
+    "io.github.pinorobotics:rtpstalk"
+  ]);
 }
 
 jar {
-    manifest { 
-        attributes 'Implementation-Version': "${rootProject.version}"
-    }
+  manifest { 
+    attributes 'Implementation-Version': "${rootProject.version}"
+  }
 }
 
 javadoc {
-    options.noTimestamp = true
-    options.noQualifiers = ["all"]
-    options.noTree = true
-    options.noIndex = true
-    options.noNavBar = true
-    // ignore missing @return, @param etc
-    options.addBooleanOption('Xdoclint:all,-missing', true)
-    exclude 'id/jros2client/impl/**'
+  options.noTimestamp = true
+  options.noQualifiers = ["all"]
+  options.noTree = true
+  options.noIndex = true
+  options.noNavBar = true
+  // ignore missing @return, @param etc
+  options.addBooleanOption('Xdoclint:all,-missing', true)
+  exclude 'id/jros2client/impl/**'
 }
 
 def packageDir = "$buildDir/package/${projectName}"
 
 task createRelease(type: Zip) {
-    archiveFileName = "$releaseFileName"
-    destinationDirectory = file("$projectDir/release")
-    from file("$packageDir/..")
+  archiveFileName = "$releaseFileName"
+  destinationDirectory = file("$projectDir/release")
+  from file("$packageDir/..")
 }
 
 task copyLibs(type: Copy) {
-    from configurations.runtimeClasspath
-    from jar.archiveFile
-    into "${packageDir}/libs"
+  from configurations.runtimeClasspath
+  from jar.archiveFile
+  into "${packageDir}/libs"
 }
 
 task createPackage(type: Copy, dependsOn: [copyLibs]) {
-    from "${project.rootDir}/README.md"
-    from "${project.rootDir}/LICENSE-2.0.txt"
-    into packageDir
+  from "${project.rootDir}/README.md"
+  from "${project.rootDir}/LICENSE-2.0.txt"
+  into packageDir
 }
 
 task cleanRelease(type: Delete) {
-    delete "$projectDir/release"
+  delete "$projectDir/release"
 }
 
 createRelease.dependsOn createPackage, javadoc
@@ -86,13 +88,13 @@ if (project.hasProperty('publish')) {
 
   // update version only during publishing
   task updateVersion() {
-      if (version.contains("SNAPSHOT")) return;
-      println "Updating version to " + version
-      new id.xfunction.text.Substitutor()
-          .withRegexpSupport()
-          .substitute(java.nio.file.Paths.get("${project.rootDir}/README.md"), Map.of(
-              "io.github.lambdaprime:jros2client:[0-9.]+", "io.github.lambdaprime:jros2client:" + version
-          ));
+    if (version.contains("SNAPSHOT")) return;
+    println "Updating version to " + version
+    new id.xfunction.text.Substitutor()
+      .withRegexpSupport()
+      .substitute(java.nio.file.Paths.get("${project.rootDir}/README.md"), Map.of(
+        "io.github.lambdaprime:jros2client:[0-9.]+", "io.github.lambdaprime:jros2client:" + version
+      ));
   }
   createPackage.dependsOn updateVersion
 
@@ -156,7 +158,7 @@ if (project.hasProperty('publish')) {
         }
         url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
       }
-    }    
+    }
   }
 
   if (project.hasProperty('signing.secretKeyRingFile')) {

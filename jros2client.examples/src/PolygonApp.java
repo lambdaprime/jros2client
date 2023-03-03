@@ -37,7 +37,7 @@ public class PolygonApp {
             var publisher = new TopicSubmissionPublisher<>(PolygonStampedMessage.class, topic);
             client.publish(publisher);
             cli.print("Press any key to stop publishing...");
-            while (!cli.wasKeyPressed()) {
+            while (!cli.wasEnterKeyPressed()) {
                 PolygonStampedMessage polygon = new PolygonStampedMessage()
                         .withHeader(new HeaderMessage()
                                 .withFrameId("/map")

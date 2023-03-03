@@ -23,13 +23,13 @@ import id.jros2client.impl.rmw.DdsNameMapper;
 import id.jros2client.impl.rmw.RmwConstants;
 import id.jrosclient.RosVersion;
 import id.jrosclient.TopicPublisher;
+import id.jrosclient.exceptions.JRosClientException;
 import id.jrosmessages.Message;
 import id.xfunction.concurrent.SameThreadExecutorService;
 import id.xfunction.concurrent.flow.TransformProcessor;
 import id.xfunction.logging.TracingToken;
 import id.xfunction.logging.XLogger;
 import id.xfunction.util.LazyService;
-import java.io.IOException;
 import java.util.EnumSet;
 import java.util.concurrent.Flow.Subscriber;
 import pinorobotics.rtpstalk.RtpsTalkClient;
@@ -61,7 +61,8 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
 
     @Override
     public <M extends Message> void subscribe(
-            String topic, Class<M> messageClass, Subscriber<M> subscriber) throws Exception {
+            String topic, Class<M> messageClass, Subscriber<M> subscriber)
+            throws JRosClientException {
         startLazy();
         logger.fine("Subscribing to {0} type {1}", topic, messageClass.getName());
         var messageName = rosNameMapper.asFullyQualifiedDdsTypeName(messageClass);
@@ -77,7 +78,8 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
     }
 
     @Override
-    public <M extends Message> void publish(TopicPublisher<M> publisher) throws Exception {
+    public <M extends Message> void publish(TopicPublisher<M> publisher)
+            throws JRosClientException {
         startLazy();
         logger.fine(
                 "Publishing to {0} type {1}",
@@ -94,7 +96,7 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
 
     @Override
     public <M extends Message> void unpublish(String topic, Class<M> messageClass)
-            throws IOException {
+            throws JRosClientException {
         new UnsupportedOperationException().printStackTrace();
     }
 

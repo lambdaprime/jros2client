@@ -30,7 +30,7 @@ public class Ros2Commands implements AutoCloseable {
     private List<XProcess> procs = new ArrayList<>();
 
     public XProcess runTalker() {
-        var proc = new XExec("ros2 run demo_nodes_cpp talker").run();
+        var proc = new XExec("ros2 run demo_nodes_cpp talker").start();
         procs.add(proc);
         return proc;
     }
@@ -40,13 +40,13 @@ public class Ros2Commands implements AutoCloseable {
      * https://docs.ros.org/en/rolling/Concepts/About-Quality-of-Service-Settings.html
      */
     public XProcess runListener() {
-        var proc = new XExec("ros2 run demo_nodes_cpp listener").run();
+        var proc = new XExec("ros2 run demo_nodes_cpp listener").start();
         procs.add(proc);
         return proc;
     }
 
     public XProcess runRqt() {
-        var proc = new XExec("rqt").run();
+        var proc = new XExec("rqt").start();
         procs.add(proc);
         return proc;
     }

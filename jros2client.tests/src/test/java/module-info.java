@@ -23,6 +23,7 @@ open module jros2client.tests {
     requires org.junit.jupiter.params;
     requires jros2client;
     requires id.xfunction;
+    requires id.xfunctiontests;
     requires id.kineticstreamer;
     requires jrosclient;
     requires jrosclient.tests;
