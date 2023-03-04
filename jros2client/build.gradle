@@ -22,16 +22,13 @@ eclipse.classpath.file {
 }
 
 dependencies {
-  addDependencies(this, ["implementation", "apiElements"], "6.0-SNAPSHOT", [
+  addDependencies(this, ["implementation", "apiElements"], "6.0", [
     "io.github.lambdaprime:jrosclient"
   ]);
-  addDependencies(this, ["implementation", "apiElements"], "2.0-SNAPSHOT", [
+  addDependencies(this, ["implementation", "apiElements"], "2.0", [
     "io.github.lambdaprime:jros2messages"
   ]);
-  addDependencies(this, ["implementation", "apiElements"], "20.0", [
-    "io.github.lambdaprime:id.xfunction"
-  ]);
-  addDependencies(this, ["implementation", "apiElements"], "3.0-SNAPSHOT", [
+  addDependencies(this, ["implementation", "apiElements"], "3.0", [
     "io.github.pinorobotics:rtpstalk"
   ]);
 }
@@ -74,7 +71,8 @@ task createPackage(type: Copy, dependsOn: [copyLibs]) {
 }
 
 task cleanRelease(type: Delete) {
-  delete "$projectDir/release"
+  delete "$packageDir"
+  delete "$projectDir/release/*-SNAPSHOT.zip"
 }
 
 createRelease.dependsOn createPackage, javadoc
@@ -158,7 +156,7 @@ if (project.hasProperty('publish')) {
         }
         url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
       }
-    }
+    }    
   }
 
   if (project.hasProperty('signing.secretKeyRingFile')) {
