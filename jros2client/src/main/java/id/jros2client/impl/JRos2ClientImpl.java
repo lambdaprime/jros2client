@@ -116,11 +116,17 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
         return rtpsTalkClient;
     }
 
+    /**
+     * @hidden exclude from javadoc
+     */
     @Override
     protected void onStart() {
         logger.fine("onStart");
     }
 
+    /**
+     * @hidden exclude from javadoc
+     */
     @Override
     protected void onClose() {
         logger.fine("Close");

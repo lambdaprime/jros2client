@@ -18,11 +18,46 @@
 package id.jros2client;
 
 import id.jrosclient.JRosClient;
+import id.jrosclient.RosVersion;
+import id.jrosclient.TopicPublisher;
+import id.jrosclient.exceptions.JRosClientException;
+import id.jrosmessages.Message;
+import java.util.EnumSet;
+import java.util.concurrent.Flow.Subscriber;
 
 /**
+ * Client to ROS2.
+ *
  * @author lambdaprime intid@protonmail.com
  */
 public interface JRos2Client extends JRosClient {
 
     JRos2ClientConfiguration getConfiguration();
+
+    /** {@inheritDoc} */
+    @Override
+    EnumSet<RosVersion> getSupportedRosVersion();
+
+    /** {@inheritDoc} */
+    @Override
+    <M extends Message> void subscribe(
+            String topic, Class<M> messageClass, Subscriber<M> subscriber)
+            throws JRosClientException;
+
+    /** {@inheritDoc} */
+    @Override
+    <M extends Message> void publish(TopicPublisher<M> publisher) throws JRosClientException;
+
+    /** {@inheritDoc} */
+    @Override
+    <M extends Message> void unpublish(String topic, Class<M> messageClass)
+            throws JRosClientException;
+
+    /** {@inheritDoc} */
+    @Override
+    boolean hasPublisher(String topic);
+
+    /** {@inheritDoc} */
+    @Override
+    void close();
 }

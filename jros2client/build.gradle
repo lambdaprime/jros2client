@@ -10,6 +10,7 @@ buildscript {
 
 plugins {
   id 'com.diffplug.spotless'
+  id 'java-library'
 }
 
 apply plugin : 'eclipse'
@@ -22,15 +23,9 @@ eclipse.classpath.file {
 }
 
 dependencies {
-  addDependencies(this, ["implementation", "apiElements"], "6.0", [
-    "io.github.lambdaprime:jrosclient"
-  ]);
-  addDependencies(this, ["implementation", "apiElements"], "2.0", [
-    "io.github.lambdaprime:jros2messages"
-  ]);
-  addDependencies(this, ["implementation", "apiElements"], "3.0", [
-    "io.github.pinorobotics:rtpstalk"
-  ]);
+  api "io.github.lambdaprime:jrosclient:6.0"
+  api "io.github.lambdaprime:jros2messages:2.0"
+  api "io.github.pinorobotics:rtpstalk:3.0"
 }
 
 jar {
@@ -47,6 +42,14 @@ javadoc {
   options.noNavBar = true
   // ignore missing @return, @param etc
   options.addBooleanOption('Xdoclint:all,-missing', true)
+  // to support @inheritDoc we need to provide sources for inherited
+  // classes as part of '--module-source-path' option
+  // we use "Module-pattern form" for that. It replaces * with
+  // matched folder name which should also math module name itself
+  // https://docs.oracle.com/en/java/javase/18/docs/specs/man/javac.html#the-module-source-path-option
+  options.addStringOption('-module-source-path',
+   "${project.rootDir}/*/src/main/java:" +
+   "${project.rootDir}/../jrosclient/*/src/main/java")
   exclude 'id/jros2client/impl/**'
 }
 
@@ -82,26 +85,26 @@ clean.dependsOn cleanRelease
 // run spotless and format code before the build
 classes.dependsOn spotlessApply
 
-if (project.hasProperty('publish')) {
+task updateVersion() {
+  // update version only when it is specified and non SNAPSHOT version is built
+  if (version || version.contains("SNAPSHOT")) return;
+  println "Updating version to " + version
+  new id.xfunction.text.Substitutor()
+    .withRegexpSupport()
+    .substitute(java.nio.file.Paths.get("${project.rootDir}/README.md"), Map.of(
+      "io.github.lambdaprime:jros2client:[0-9.]+", "io.github.lambdaprime:jros2client:" + version
+    ));
+}
+createPackage.dependsOn updateVersion
 
-  // update version only during publishing
-  task updateVersion() {
-    if (version.contains("SNAPSHOT")) return;
-    println "Updating version to " + version
-    new id.xfunction.text.Substitutor()
-      .withRegexpSupport()
-      .substitute(java.nio.file.Paths.get("${project.rootDir}/README.md"), Map.of(
-        "io.github.lambdaprime:jros2client:[0-9.]+", "io.github.lambdaprime:jros2client:" + version
-      ));
-  }
-  createPackage.dependsOn updateVersion
+if (project.hasProperty('publish')) {
 
   // Initially it was taken from https://central.sonatype.org/publish/publish-gradle/
   // but since Gradle removed this plugin https://docs.gradle.org/7.0/userguide/upgrading_version_6.html#removal_of_the_legacy_maven_plugin
   // it was rewritten for new one
 
   task javadocJar(type: Jar) {
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
     from "README-javadoc.txt"
   }
 
