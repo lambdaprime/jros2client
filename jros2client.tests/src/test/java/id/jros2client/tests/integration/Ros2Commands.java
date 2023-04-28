@@ -21,6 +21,7 @@ import id.xfunction.lang.XExec;
 import id.xfunction.lang.XProcess;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author lambdaprime intid@protonmail.com
@@ -28,9 +29,21 @@ import java.util.List;
 public class Ros2Commands implements AutoCloseable {
 
     private List<XProcess> procs = new ArrayList<>();
+    private Map<String, String> env;
+    private RmwImplementation rmw;
+
+    public Ros2Commands(RmwImplementation rmw) {
+        this.rmw = rmw;
+        this.env =
+                switch (rmw) {
+                    case FASTDDS -> Map.of();
+                    case CYCLONEDDS -> Map.of("RMW_IMPLEMENTATION", "rmw_cyclonedds_cpp");
+                };
+    }
 
     public XProcess runTalker() {
-        var proc = new XExec("ros2 run demo_nodes_cpp talker").start();
+        var proc =
+                new XExec("ros2 run demo_nodes_cpp talker").withEnvironmentVariables(env).start();
         procs.add(proc);
         return proc;
     }
@@ -40,7 +53,8 @@ public class Ros2Commands implements AutoCloseable {
      * https://docs.ros.org/en/rolling/Concepts/About-Quality-of-Service-Settings.html
      */
     public XProcess runListener() {
-        var proc = new XExec("ros2 run demo_nodes_cpp listener").start();
+        var proc =
+                new XExec("ros2 run demo_nodes_cpp listener").withEnvironmentVariables(env).start();
         procs.add(proc);
         return proc;
     }
@@ -54,5 +68,10 @@ public class Ros2Commands implements AutoCloseable {
     @Override
     public void close() {
         procs.forEach(XProcess::destroyAllForcibly);
+    }
+
+    @Override
+    public String toString() {
+        return rmw.toString();
     }
 }

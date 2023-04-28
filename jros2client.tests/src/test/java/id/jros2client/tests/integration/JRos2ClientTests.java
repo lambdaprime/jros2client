@@ -38,11 +38,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import pinorobotics.rtpstalk.RtpsTalkConfiguration;
 
 /**
@@ -54,6 +56,12 @@ public class JRos2ClientTests {
     private static Ros2Commands ros2Commands;
     private static JRos2Client client;
 
+    static Stream<Ros2Commands> dataProvider() {
+        return Stream.of(
+                new Ros2Commands(RmwImplementation.FASTDDS),
+                new Ros2Commands(RmwImplementation.CYCLONEDDS));
+    }
+
     @BeforeAll
     public static void setupAll() {
         XLogger.load("jros2client-test-logging.properties");
@@ -62,17 +70,20 @@ public class JRos2ClientTests {
     @BeforeEach
     public void setup() throws MalformedURLException {
         client = factory.createClient();
-        ros2Commands = new Ros2Commands();
     }
 
     @AfterEach
     public void clean() throws Exception {
+        System.out.println("Closing client");
         client.close();
+        System.out.println("Terminating ROS2 commands");
         ros2Commands.close();
     }
 
-    @Test
-    public void test_subscribe_happy() throws Exception {
+    @ParameterizedTest
+    @MethodSource("dataProvider")
+    public void test_subscribe_happy(Ros2Commands commands) throws Exception {
+        ros2Commands = commands;
         var future = new CompletableFuture<List<Integer>>();
         client.subscribe(
                 new TopicSubscriber<>(StringMessage.class, "chatter") {
@@ -91,12 +102,14 @@ public class JRos2ClientTests {
                         getSubscription().get().request(1);
                     }
                 });
-        ros2Commands.runTalker().forwardOutputAsync();
+        ros2Commands.runTalker().forwardOutputAsync(true);
         Assertions.assertEquals("[0, 1, 2, 3, 4]", future.get().toString());
     }
 
-    @Test
-    public void test_publish_happy() throws Exception {
+    @ParameterizedTest
+    @MethodSource("dataProvider")
+    public void test_publish_happy(Ros2Commands commands) throws Exception {
+        ros2Commands = commands;
         var topicName = "/chatter";
         var publisher = new TopicSubmissionPublisher<>(StringMessage.class, topicName);
         client.publish(publisher);
@@ -155,8 +168,10 @@ public class JRos2ClientTests {
      *
      * <p>To complete the test user suppose to close rqt window only when image is displayed
      */
-    @Test
-    public void test_publish_message_over_1Mb() throws Exception {
+    @ParameterizedTest
+    @MethodSource("dataProvider")
+    public void test_publish_message_over_1Mb(Ros2Commands commands) throws Exception {
+        ros2Commands = commands;
         var message =
                 new MessageSerializationUtils()
                         .read(

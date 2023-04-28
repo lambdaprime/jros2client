@@ -24,8 +24,8 @@ eclipse.classpath.file {
 
 dependencies {
   api "io.github.lambdaprime:jrosclient:6.0"
-  api "io.github.lambdaprime:jros2messages:2.0"
-  api "io.github.pinorobotics:rtpstalk:3.0"
+  api "io.github.lambdaprime:jros2messages:3.0-SNAPSHOT"
+  api "io.github.pinorobotics:rtpstalk:4.0-SNAPSHOT"
 }
 
 jar {
