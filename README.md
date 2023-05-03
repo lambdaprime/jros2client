@@ -6,7 +6,7 @@ Java 17+
 
 # Download
 
-[Release versions](https://github.com/lambdaprime/jros2client/releases)
+[Release versions](jros2client/release/CHANGELOG.md)
 
 Or you can add dependency to it as follows:
 
@@ -14,7 +14,7 @@ Gradle:
 
 ```
 dependencies {
-    implementation 'io.github.lambdaprime:jros2client:2.0'
+  implementation 'io.github.lambdaprime:jros2client:3.0'
 }
 ```
 

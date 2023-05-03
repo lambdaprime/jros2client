@@ -24,8 +24,8 @@ eclipse.classpath.file {
 
 dependencies {
   api "io.github.lambdaprime:jrosclient:6.0"
-  api "io.github.lambdaprime:jros2messages:3.0-SNAPSHOT"
-  api "io.github.pinorobotics:rtpstalk:4.0-SNAPSHOT"
+  api "io.github.lambdaprime:jros2messages:3.0"
+  api "io.github.pinorobotics:rtpstalk:4.0"
 }
 
 jar {
@@ -87,7 +87,8 @@ classes.dependsOn spotlessApply
 
 task updateVersion() {
   // update version only when it is specified and non SNAPSHOT version is built
-  if (version || version.contains("SNAPSHOT")) return;
+  // 'unspecified' is the default value for the version in Gradle if it is not set
+  if (!version || version == "unspecified" || version.contains("SNAPSHOT")) return;
   println "Updating version to " + version
   new id.xfunction.text.Substitutor()
     .withRegexpSupport()
@@ -95,7 +96,7 @@ task updateVersion() {
       "io.github.lambdaprime:jros2client:[0-9.]+", "io.github.lambdaprime:jros2client:" + version
     ));
 }
-createPackage.dependsOn updateVersion
+createRelease.dependsOn updateVersion
 
 if (project.hasProperty('publish')) {
 
