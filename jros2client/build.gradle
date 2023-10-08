@@ -67,7 +67,14 @@ task copyLibs(type: Copy) {
   into "${packageDir}/libs"
 }
 
-task createPackage(type: Copy, dependsOn: [copyLibs]) {
+task copyExamples(type: Copy) {
+  from("${project.rootDir}/jros2client.examples/src") {
+    include "**"
+  }
+  into "${packageDir}/examples"
+}
+
+task createPackage(type: Copy, dependsOn: [copyLibs, copyExamples]) {
   from "${project.rootDir}/README.md"
   from "${project.rootDir}/LICENSE-2.0.txt"
   into packageDir
