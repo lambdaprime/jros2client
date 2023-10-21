@@ -1,0 +1,2 @@
+char letter
+char[] data
