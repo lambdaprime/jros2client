@@ -18,21 +18,25 @@
 package id.jros2client.tests.integration;
 
 import id.jros2client.JRos2ClientFactory;
+import id.jros2client.tests.MetricsExtension;
 import id.jrosclient.tests.integration.JRosPubSubClientTests;
 import id.xfunction.logging.XLogger;
+import java.time.Duration;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Test that Publisher and Subscriber of JRos2Client can interact with each other.
  *
  * @author lambdaprime intid@protonmail.com
  */
+@ExtendWith({MetricsExtension.class})
 public class JRos2PubSubClientTests extends JRosPubSubClientTests {
 
     private static final JRos2ClientFactory factory = new JRos2ClientFactory();
 
     static {
-        init(() -> factory.createClient());
+        init(() -> factory.createClient(), Duration.ofMillis(6_000), Duration.ofMillis(13_000), 80);
     }
 
     @BeforeAll

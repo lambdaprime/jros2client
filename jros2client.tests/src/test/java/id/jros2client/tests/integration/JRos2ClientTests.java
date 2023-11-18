@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.toList;
 import id.jros2client.JRos2Client;
 import id.jros2client.JRos2ClientConfiguration;
 import id.jros2client.JRos2ClientFactory;
+import id.jros2client.tests.MetricsExtension;
 import id.jros2messages.MessageSerializationUtils;
 import id.jros2messages.sensor_msgs.ImageMessage;
 import id.jrosclient.TopicSubmissionPublisher;
@@ -43,6 +44,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import pinorobotics.rtpstalk.RtpsTalkConfiguration;
@@ -50,6 +52,7 @@ import pinorobotics.rtpstalk.RtpsTalkConfiguration;
 /**
  * @author lambdaprime intid@protonmail.com
  */
+@ExtendWith({MetricsExtension.class})
 public class JRos2ClientTests {
 
     private static final JRos2ClientFactory factory = new JRos2ClientFactory();
@@ -160,7 +163,7 @@ public class JRos2ClientTests {
      * Test that:
      *
      * <ul>
-     *   <li>messages over 1mb are fragmented
+     *   <li>messages over 1mb are fragmented (total bytes expected 1,555,248)
      *   <li>publisher can support multiple subscribers with different DURABILITY (rqt has
      *       BEST_EFFORT)
      *   <li>when history cache runs out we clean it up after RELIABLE Readers ack the changes

@@ -29,6 +29,10 @@ open module jros2client.tests {
     requires jrosclient.tests;
     requires jrosmessages;
     requires jros2messages;
+    requires io.opentelemetry.sdk.metrics;
+    requires io.opentelemetry.api;
+    requires io.opentelemetry.sdk;
+    requires id.opentelemetry.exporters.pack;
 
     exports id.jros2client.tests.integration;
 }

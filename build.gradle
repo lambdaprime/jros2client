@@ -71,3 +71,5 @@ ext {
 def requiredGradleVersion = "8.3"
 if ("$gradle.gradleVersion" != "$requiredGradleVersion")
   throw new RuntimeException("Running gradle version $gradle.gradleVersion, required $requiredGradleVersion");
+
+println "Version: ${version}"
