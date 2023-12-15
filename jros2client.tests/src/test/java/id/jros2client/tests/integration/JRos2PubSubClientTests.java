@@ -17,10 +17,13 @@
  */
 package id.jros2client.tests.integration;
 
+import id.jros2client.JRos2ClientConfiguration;
 import id.jros2client.JRos2ClientFactory;
 import id.jros2client.tests.MetricsExtension;
+import id.jrosclient.JRosClient;
 import id.jrosclient.tests.integration.JRosPubSubClientTests;
 import id.xfunction.logging.XLogger;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -35,7 +38,16 @@ public class JRos2PubSubClientTests extends JRosPubSubClientTests {
     private static final JRos2ClientFactory factory = new JRos2ClientFactory();
 
     static {
-        init(() -> factory.createClient());
+        Supplier<JRosClient> clientFactory = factory::createClient;
+        var defaultConfig = new JRos2ClientConfiguration.Builder().build();
+        init(
+                new TestCase(
+                        "test_jros2client",
+                        clientFactory,
+                        defaultConfig
+                                .rtpsTalkConfiguration()
+                                .spdpDiscoveredParticipantDataPublishPeriod(),
+                        defaultConfig.rtpsTalkConfiguration().historyCacheMaxSize()));
     }
 
     @BeforeAll

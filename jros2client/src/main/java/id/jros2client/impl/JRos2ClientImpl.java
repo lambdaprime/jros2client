@@ -25,8 +25,8 @@ import id.jrosclient.RosVersion;
 import id.jrosclient.TopicPublisher;
 import id.jrosclient.exceptions.JRosClientException;
 import id.jrosmessages.Message;
-import id.xfunction.concurrent.SameThreadExecutorService;
-import id.xfunction.concurrent.flow.TransformProcessor;
+import id.xfunction.concurrent.flow.TransformPublisher;
+import id.xfunction.concurrent.flow.TransformSubscriber;
 import id.xfunction.logging.TracingToken;
 import id.xfunction.logging.XLogger;
 import id.xfunction.util.LazyService;
@@ -68,11 +68,7 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
         var messageName = rosNameMapper.asFullyQualifiedDdsTypeName(messageClass);
         topic = rosNameMapper.asFullyQualifiedDdsTopicName(topic, messageClass);
         var transformer =
-                new TransformProcessor<>(
-                        messageUtils.deserializer(messageClass),
-                        new SameThreadExecutorService(),
-                        1);
-        transformer.subscribe(subscriber);
+                new TransformSubscriber<>(subscriber, messageUtils.deserializer(messageClass));
         rtpsTalkClient.subscribe(
                 topic, messageName, RmwConstants.DEFAULT_SUBSCRIBER_QOS, transformer);
     }
@@ -87,11 +83,13 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
         var messageClass = publisher.getMessageClass();
         var messageName = rosNameMapper.asFullyQualifiedDdsTypeName(messageClass);
         var topic = rosNameMapper.asFullyQualifiedDdsTopicName(publisher.getTopic(), messageClass);
-        var transformer =
-                new TransformProcessor<>(
-                        messageUtils.serializer(), new SameThreadExecutorService(), 1);
-        publisher.subscribe(transformer);
-        rtpsTalkClient.publish(topic, messageName, RmwConstants.DEFAULT_PUBLISHER_QOS, transformer);
+        var transformer = new TransformPublisher<>(publisher, messageUtils.serializer());
+        rtpsTalkClient.publish(
+                topic,
+                messageName,
+                RmwConstants.DEFAULT_PUBLISHER_QOS,
+                RmwConstants.DEFAULT_WRITER_SETTINGS,
+                transformer);
     }
 
     @Override

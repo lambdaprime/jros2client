@@ -17,6 +17,7 @@
  */
 package id.jros2client.impl.rmw;
 
+import pinorobotics.rtpstalk.WriterSettings;
 import pinorobotics.rtpstalk.qos.DurabilityType;
 import pinorobotics.rtpstalk.qos.PublisherQosPolicy;
 import pinorobotics.rtpstalk.qos.ReliabilityType;
@@ -48,4 +49,20 @@ public interface RmwConstants {
     SubscriberQosPolicy DEFAULT_SUBSCRIBER_QOS =
             new SubscriberQosPolicy(
                     ReliabilityType.RELIABLE, DurabilityType.VOLATILE_DURABILITY_QOS);
+
+    /**
+     * In FastDDS pushMode <a
+     * href="https://github.com/eProsima/Fast-DDS/blob/1a070975177802b62efed52cd62557be7a6c3eb0/include/fastdds/rtps/writer/RTPSWriter.h#L512">enabled
+     * by default</a> Looking at <a href="https://github.com/ros2/rmw_fastrtps.git">ROS2 RMW</a> the
+     * pushMode setting is not being changed. <a href="http://design.ros2.org/articles/qos.html">ROS
+     * official document</a> does not mention pushMode. All this points that ROS2 by default has
+     * pushMode enabled.
+     *
+     * <p>To more align with ROS2 default behavior in <b>jros2client</a> the pushMode is enabled by
+     * default
+     */
+    boolean DEFAULT_PUSHMODE_ENABLED = true;
+
+    /** Publisher settings */
+    WriterSettings DEFAULT_WRITER_SETTINGS = new WriterSettings(DEFAULT_PUSHMODE_ENABLED);
 }

@@ -35,6 +35,16 @@ public record JRos2ClientConfiguration(RtpsTalkConfiguration rtpsTalkConfigurati
          *
          * <p>Default RTPS settings taken from {@link
          * pinorobotics.rtpstalk.RtpsTalkConfiguration.Builder}
+         *
+         * <p>Example how to change default domain id:
+         *
+         * <pre>{@code
+         * new RtpsTalkConfiguration.Builder()
+         *     .domainId(123)
+         *     .build();
+         * }</pre>
+         *
+         * @see <a href="http://pinoweb.freetzi.com/rtpstalk/">rtpstalk documentation</a>
          */
         public Builder rtpsTalkConfiguration(RtpsTalkConfiguration rtpsTalkConfiguration) {
             this.rtpsTalkConfiguration = rtpsTalkConfiguration;

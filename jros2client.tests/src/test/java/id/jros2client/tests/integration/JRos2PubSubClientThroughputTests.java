@@ -32,15 +32,16 @@ public class JRos2PubSubClientThroughputTests extends JRosPubSubClientThroughput
     private static final JRos2ClientFactory factory = new JRos2ClientFactory();
 
     static {
-        Supplier<JRosClient> clientFactory = () -> factory.createClient();
+        Supplier<JRosClient> clientFactory = factory::createClient;
         init(
-                // Send 83 packages where each package size is 60kb (total data 5mb) and default
-                // history queue size 10. Expected time
-                // - less than 40secs
+                /**
+                 * Send 83 packages where each package size is 60kb (total data 5mb). Expected time
+                 * - less than 10secs
+                 */
                 new TestCase(
                         "test_publish_multiple_60kb_messages",
                         clientFactory,
-                        Duration.ofSeconds(40),
+                        Duration.ofSeconds(10),
                         60_000,
                         83,
                         Duration.ZERO,
@@ -48,14 +49,16 @@ public class JRos2PubSubClientThroughputTests extends JRosPubSubClientThroughput
                 new TestCase(
                         "test_publish_single_message_over_5mb",
                         clientFactory,
-                        Duration.ofMillis(13_000),
+                        Duration.ofSeconds(10),
                         5_123_456,
                         1,
                         Duration.ZERO,
                         1),
 
-                // Constantly publish messages over 5mb for period of 1 minute. Expect  Subscriber
-                // to receive at least 80 messages
+                /**
+                 * Constantly publish messages over 5mb for period of 1 minute. Expect Subscriber to
+                 * receive at least 80 messages
+                 */
                 new TestCase(
                         "test_throutput",
                         clientFactory,
