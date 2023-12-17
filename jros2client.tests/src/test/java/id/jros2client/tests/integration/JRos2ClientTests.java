@@ -94,6 +94,7 @@ public class JRos2ClientTests {
 
                     @Override
                     public void onNext(StringMessage item) {
+                        super.onNext(item);
                         System.out.println(item.data);
                         var n = Integer.parseInt(item.data.substring("Hello World: ".length()));
                         buf.add(n);

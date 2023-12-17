@@ -31,6 +31,7 @@ module jros2client {
     requires transitive jrosclient;
     requires transitive jros2messages;
     requires transitive rtpstalk;
+    requires io.opentelemetry.api;
 
     exports id.jros2client;
     exports id.jros2client.impl to
