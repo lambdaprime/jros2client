@@ -23,8 +23,8 @@ eclipse.classpath.file {
 }
 
 dependencies {
-  api "io.github.lambdaprime:jrosclient:7.0-SNAPSHOT"
-  api "io.github.lambdaprime:jros2messages:4.0-SNAPSHOT"
+  api "io.github.lambdaprime:jrosclient:7.0"
+  api "io.github.lambdaprime:jros2messages:4.0"
   api "io.github.pinorobotics:rtpstalk:5.0"
   api "io.opentelemetry:opentelemetry-api:1.22.0"
 }

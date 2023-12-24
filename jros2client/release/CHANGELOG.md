@@ -1,3 +1,17 @@
+# Version 4
+
+- Adding build support for Android
+- Integrating metrics
+- Issue #8 Enable pushMode by default
+- Adding throughput tests
+- Issue lambdaprime/jros2messages#1 Adding example for images
+- Updating rtpstalk to 5.0-SNAPSHOT and integrating metrics to tests
+- Issue #6 Updating jros2messages
+- Issue #3 Adding examples for char type
+- Issue #2 Adding example for pub/sub in same application
+
+[jros2client-v4.0.zip](https://github.com/lambdaprime/jros2client/raw/main/jros2client/release/jros2client-v4.0.zip)
+
 # Version 3
 
 Previously [rtpstalk](https://github.com/pinorobotics/rtpstalk) supported only RTPS versions 2.2 and 2.3. [CycloneDDS 0.9.x (Papillons)](https://github.com/eclipse-cyclonedds/cyclonedds.git), which is [included into ROS2 Humble](https://www.ros.org/reps/rep-2000.html#humble-hawksbill-may-2022-may-2027), uses RTPS 2.1. Because `jrosclient` relies on `rtpstalk` for RTPS communication, it could not interact with ROS2 nodes running on `CycloneDDS RMW`.
