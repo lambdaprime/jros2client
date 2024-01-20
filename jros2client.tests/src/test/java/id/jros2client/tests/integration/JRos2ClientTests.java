@@ -22,12 +22,12 @@ import static java.util.stream.Collectors.toList;
 import id.jros2client.JRos2Client;
 import id.jros2client.JRos2ClientConfiguration;
 import id.jros2client.JRos2ClientFactory;
-import id.jros2client.tests.MetricsExtension;
 import id.jros2messages.MessageSerializationUtils;
 import id.jros2messages.sensor_msgs.ImageMessage;
 import id.jrosclient.TopicSubmissionPublisher;
 import id.jrosclient.TopicSubscriber;
 import id.jrosmessages.std_msgs.StringMessage;
+import id.opentelemetry.exporters.extensions.ElasticsearchMetricsExtension;
 import id.xfunction.concurrent.flow.FixedCollectorSubscriber;
 import id.xfunction.lang.XThread;
 import id.xfunction.logging.XLogger;
@@ -52,7 +52,7 @@ import pinorobotics.rtpstalk.RtpsTalkConfiguration;
 /**
  * @author lambdaprime intid@protonmail.com
  */
-@ExtendWith({MetricsExtension.class})
+@ExtendWith({ElasticsearchMetricsExtension.class})
 public class JRos2ClientTests {
 
     private static final JRos2ClientFactory factory = new JRos2ClientFactory();

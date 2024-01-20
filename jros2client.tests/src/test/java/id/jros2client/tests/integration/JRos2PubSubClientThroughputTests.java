@@ -18,16 +18,16 @@
 package id.jros2client.tests.integration;
 
 import id.jros2client.JRos2ClientFactory;
-import id.jros2client.tests.MetricsExtension;
 import id.jrosclient.JRosClient;
 import id.jrosclient.tests.integration.JRosPubSubClientThroughputTests;
+import id.opentelemetry.exporters.extensions.ElasticsearchMetricsExtension;
 import id.xfunction.logging.XLogger;
 import java.time.Duration;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith({MetricsExtension.class})
+@ExtendWith({ElasticsearchMetricsExtension.class})
 public class JRos2PubSubClientThroughputTests extends JRosPubSubClientThroughputTests {
     private static final JRos2ClientFactory factory = new JRos2ClientFactory();
 

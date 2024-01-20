@@ -31,6 +31,6 @@ public interface JRos2ClientConstants {
      * These attributes allow to identify metrics for jros2client.
      */
     @SuppressWarnings("exports")
-    Attributes JROS2CLIENT_ATTRS =
+    Attributes METRIC_ATTRS =
             Attributes.builder().put("RosVersion", RosVersion.ROS2.toString()).build();
 }

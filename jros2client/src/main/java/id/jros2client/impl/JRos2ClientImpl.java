@@ -85,7 +85,7 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
         rtpsTalkClient = factory.createRtpsTalkClient(config.rtpsTalkConfiguration());
         tracingToken = new TracingToken("" + hashCode());
         logger = XLogger.getLogger(getClass(), tracingToken);
-        CLIENT_OBJECTS_METER.record(1, JRos2ClientConstants.JROS2CLIENT_ATTRS);
+        CLIENT_OBJECTS_METER.record(1, JRos2ClientConstants.METRIC_ATTRS);
     }
 
     @Override
@@ -100,7 +100,7 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
                 new TransformSubscriber<>(subscriber, messageUtils.deserializer(messageClass));
         rtpsTalkClient.subscribe(
                 topic, messageName, RmwConstants.DEFAULT_SUBSCRIBER_QOS, transformer);
-        SUBSCRIBE_CALLS_METER.record(1, JRos2ClientConstants.JROS2CLIENT_ATTRS);
+        SUBSCRIBE_CALLS_METER.record(1, JRos2ClientConstants.METRIC_ATTRS);
     }
 
     @Override
@@ -120,7 +120,7 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
                 RmwConstants.DEFAULT_PUBLISHER_QOS,
                 RmwConstants.DEFAULT_WRITER_SETTINGS,
                 transformer);
-        PUBLISH_CALLS_METER.record(1, JRos2ClientConstants.JROS2CLIENT_ATTRS);
+        PUBLISH_CALLS_METER.record(1, JRos2ClientConstants.METRIC_ATTRS);
     }
 
     @Override
@@ -160,7 +160,7 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
     protected void onClose() {
         logger.fine("Close");
         rtpsTalkClient.close();
-        CLIENT_CLOSE_CALLS_METER.record(1, JRos2ClientConstants.JROS2CLIENT_ATTRS);
+        CLIENT_CLOSE_CALLS_METER.record(1, JRos2ClientConstants.METRIC_ATTRS);
     }
 
     @Override

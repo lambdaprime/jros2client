@@ -22,15 +22,15 @@ import static pinorobotics.rtpstalk.RtpsTalkConfiguration.Builder.DEFAULT_HEARTB
 
 import id.jros2client.JRos2ClientConfiguration;
 import id.jros2client.JRos2ClientFactory;
-import id.jros2client.tests.MetricsExtension;
 import id.jrosclient.tests.integration.JRosPubSubClientLatencyTests;
+import id.opentelemetry.exporters.extensions.ElasticsearchMetricsExtension;
 import id.xfunction.logging.XLogger;
 import java.time.Duration;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
 import pinorobotics.rtpstalk.RtpsTalkConfiguration;
 
-@ExtendWith({MetricsExtension.class})
+@ExtendWith({ElasticsearchMetricsExtension.class})
 public class JRos2PubSubClientLatencyTests extends JRosPubSubClientLatencyTests {
     private static final JRos2ClientFactory factory = new JRos2ClientFactory();
 
