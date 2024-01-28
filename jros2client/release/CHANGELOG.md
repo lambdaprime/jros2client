@@ -1,3 +1,10 @@
+# Version 5
+
+- Updating jrosclient:8.0, jros2messages:5.0, rtpstalk:6.0
+- Integrating opentelemetry-exporters-pack-junit
+
+[jros2client-v5.0.zip](https://github.com/lambdaprime/jros2client/raw/main/jros2client/release/jros2client-v5.0.zip)
+
 # Version 4
 
 - Adding build support for Android
