@@ -10,8 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'io.github.lambdaprime:jros2messages:1.0'
-    implementation project(':jros2client')
+  implementation project(':jros2client')
 }
 
 sourceCompatibility = '17'

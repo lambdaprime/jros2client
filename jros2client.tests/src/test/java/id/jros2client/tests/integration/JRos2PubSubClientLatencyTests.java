@@ -37,16 +37,6 @@ public class JRos2PubSubClientLatencyTests extends JRosPubSubClientLatencyTests 
     static {
         init(
                 new TestCase(
-                        "test_latency_small_queue",
-                        () -> factory.createClient(),
-                        // avoid measuring latency which is caused due to discovery protocol
-                        DEFAULT_DISCOVERY_PERIOD.plus(DEFAULT_HEARTBEAT_PERIOD).plusSeconds(1),
-                        // how long to run test
-                        DEFAULT_DISCOVERY_PERIOD.plusSeconds(20),
-                        60_000,
-                        DEFAULT_HEARTBEAT_PERIOD.plusMillis(60),
-                        1700),
-                new TestCase(
                         "test_latency_big_queue",
                         () ->
                                 factory.createClient(
@@ -60,7 +50,17 @@ public class JRos2PubSubClientLatencyTests extends JRosPubSubClientLatencyTests 
                         DEFAULT_DISCOVERY_PERIOD.plusSeconds(20),
                         60_000,
                         Duration.ofMillis(800),
-                        14_000));
+                        14_000),
+                new TestCase(
+                        "test_latency_small_queue",
+                        () -> factory.createClient(),
+                        // avoid measuring latency which is caused due to discovery protocol
+                        DEFAULT_DISCOVERY_PERIOD.plus(DEFAULT_HEARTBEAT_PERIOD).plusSeconds(1),
+                        // how long to run test
+                        DEFAULT_DISCOVERY_PERIOD.plusSeconds(20),
+                        60_000,
+                        DEFAULT_HEARTBEAT_PERIOD.plusMillis(60),
+                        1700));
     }
 
     @BeforeAll
