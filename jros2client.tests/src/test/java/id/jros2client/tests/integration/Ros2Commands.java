@@ -36,7 +36,7 @@ public class Ros2Commands implements AutoCloseable {
         this.rmw = rmw;
         this.env =
                 switch (rmw) {
-                    case FASTDDS -> Map.of();
+                    case FASTDDS -> Map.of("RMW_IMPLEMENTATION", "rmw_fastrtps_cpp");
                     case CYCLONEDDS -> Map.of("RMW_IMPLEMENTATION", "rmw_cyclonedds_cpp");
                 };
     }
@@ -60,7 +60,7 @@ public class Ros2Commands implements AutoCloseable {
     }
 
     public XProcess runRqt() {
-        var proc = new XExec("rqt").start();
+        var proc = new XExec("rqt").withEnvironmentVariables(env).start();
         procs.add(proc);
         return proc;
     }

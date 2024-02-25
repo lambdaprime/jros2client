@@ -165,8 +165,8 @@ public class JRos2ClientTests {
      *
      * <ul>
      *   <li>messages over 1mb are fragmented (total bytes expected 1,555,248)
-     *   <li>publisher can support multiple subscribers with different DURABILITY (rqt has
-     *       BEST_EFFORT)
+     *   <li>publisher can support multiple subscribers: first subscriber is rqt with
+     *       DURABILITY=BEST_EFFORT, second subscriber is jrosclient with DURABILITY=RELIABLE.
      *   <li>when history cache runs out we clean it up after RELIABLE Readers ack the changes
      * </ul>
      *
@@ -204,7 +204,7 @@ public class JRos2ClientTests {
                                     publisher.submit(message);
                                 }
                             });
-            proc.await();
+            proc.stderrThrow();
             var actual = collector.getFuture().get();
             Assertions.assertEquals(8, actual.size());
             Assertions.assertEquals(message, actual.get(0));
