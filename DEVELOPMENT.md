@@ -2,6 +2,12 @@
 
 Building module locally and making changes to it (this is optional and not intended for users).
 
+## With Gradle
+
+``` bash
+gradle clean build
+```
+
 ## With Eclipse
 
 - Build eclipse projects:

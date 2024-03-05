@@ -42,7 +42,7 @@ public class JRos2PubSubClientLatencyTests extends JRosPubSubClientLatencyTests 
                                 factory.createClient(
                                         new JRos2ClientConfiguration(
                                                 new RtpsTalkConfiguration.Builder()
-                                                        .historyCacheMaxSize(1_000)
+                                                        .historyCacheMaxSize(800)
                                                         .build())),
                         // avoid measuring latency which is caused due to discovery protocol
                         DEFAULT_DISCOVERY_PERIOD.plus(DEFAULT_HEARTBEAT_PERIOD).plusSeconds(1),
