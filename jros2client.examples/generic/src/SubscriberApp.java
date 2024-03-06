@@ -1,7 +1,7 @@
 /*
  * Copyright 2020 jrosclient project
  * 
- * Website: https://github.com/lambdaprime/jrosclient
+ * Website: https://github.com/lambdaprime/jros2client
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import id.jrosmessages.std_msgs.StringMessage;
 
 /**
  * Subscribes to ROS topic
+ *
+ * @author lambdaprime intid@protonmail.com
  */
 public class SubscriberApp {
 
@@ -28,14 +30,15 @@ public class SubscriberApp {
         var client = new JRos2ClientFactory().createClient();
         var topicName = "/helloRos";
         // register a new subscriber
-        client.subscribe(new TopicSubscriber<>(StringMessage.class, topicName) {
-            @Override
-            public void onNext(StringMessage item) {
-                System.out.println(item);
-                // request next message
-                getSubscription().get().request(1);
-            }
-        });
+        client.subscribe(
+                new TopicSubscriber<>(StringMessage.class, topicName) {
+                    @Override
+                    public void onNext(StringMessage item) {
+                        System.out.println(item);
+                        // request next message
+                        getSubscription().get().request(1);
+                    }
+                });
 
         // usually we need to close client once we are done
         // but here we keep it open so that subscriber will keep

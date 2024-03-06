@@ -1,7 +1,7 @@
 /*
  * Copyright 2020 jrosclient project
  * 
- * Website: https://github.com/lambdaprime/jrosclient
+ * Website: https://github.com/lambdaprime/jros2client
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import id.jrosmessages.std_msgs.StringMessage;
 
 /**
  * Creates a new topic and publishes messages to it.
+ *
+ * @author lambdaprime intid@protonmail.com
  */
 public class PublisherApp {
 
@@ -41,4 +43,3 @@ public class PublisherApp {
         // printing messages indefinitely
     }
 }
-

@@ -1,7 +1,7 @@
 /*
  * Copyright 2020 jrosclient project
  * 
- * Website: https://github.com/lambdaprime/jrosclient
+ * Website: https://github.com/lambdaprime/jros2client
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,9 @@ import id.jrosmessages.primitives.Time;
 import id.xfunction.cli.CommandLineInterface;
 
 /**
- * Demonstrates how to define custom messages using PolygonStampedMessage
- * as an example.
+ * Demonstrates how to define custom messages using PolygonStampedMessage as an example.
+ *
+ * @author lambdaprime intid@protonmail.com
  */
 public class PolygonApp {
 
@@ -38,15 +39,20 @@ public class PolygonApp {
             client.publish(publisher);
             cli.print("Press any key to stop publishing...");
             while (!cli.wasEnterKeyPressed()) {
-                PolygonStampedMessage polygon = new PolygonStampedMessage()
-                        .withHeader(new HeaderMessage()
-                                .withFrameId("/map")
-                                .withStamp(Time.now()))
-                        .withPolygon(new PolygonMessage()
-                                .withPoints(new Point32Message[]{
-                                        new Point32Message(2F, 2F, 0F),
-                                        new Point32Message(1F, 2F, 3F),
-                                        new Point32Message(0F, 0F, 0F)}));
+                PolygonStampedMessage polygon =
+                        new PolygonStampedMessage()
+                                .withHeader(
+                                        new HeaderMessage()
+                                                .withFrameId("/map")
+                                                .withStamp(Time.now()))
+                                .withPolygon(
+                                        new PolygonMessage()
+                                                .withPoints(
+                                                        new Point32Message[] {
+                                                            new Point32Message(2F, 2F, 0F),
+                                                            new Point32Message(1F, 2F, 3F),
+                                                            new Point32Message(0F, 0F, 0F)
+                                                        }));
                 publisher.submit(polygon);
                 cli.print("Published");
                 Thread.sleep(1000);
@@ -54,12 +60,8 @@ public class PolygonApp {
         }
     }
 
-
-    /**
-     * Example of custom message definition
-     */
-    @MessageMetadata(
-        name = PolygonMessage.NAME)
+    /** Example of custom message definition */
+    @MessageMetadata(name = PolygonMessage.NAME)
     public static class PolygonMessage implements Message {
 
         static final String NAME = "geometry_msgs/Polygon";
@@ -70,20 +72,16 @@ public class PolygonApp {
             this.points = points;
             return this;
         }
-
     }
 
-    /**
-     * Example of custom message definition
-     */
-    @MessageMetadata(
-        name = PolygonStampedMessage.NAME)
+    /** Example of custom message definition */
+    @MessageMetadata(name = PolygonStampedMessage.NAME)
     public static class PolygonStampedMessage implements Message {
 
         static final String NAME = "geometry_msgs/PolygonStamped";
 
         public HeaderMessage header = new HeaderMessage();
-    
+
         public PolygonMessage polygon = new PolygonMessage();
 
         public PolygonStampedMessage withPolygon(PolygonMessage polygon) {

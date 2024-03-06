@@ -1,7 +1,7 @@
 /*
  * Copyright 2020 jrosclient project
  * 
- * Website: https://github.com/lambdaprime/jrosclient
+ * Website: https://github.com/lambdaprime/jros2client
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,18 +24,20 @@ import id.jrosmessages.std_msgs.StringMessage;
 import id.xfunction.cli.CommandLineInterface;
 
 /**
- * Example covers how to use jrosclient for Subscriber and Publisher to same topic
- * inside single application.
- * 
+ * Example covers how to use jrosclient for Subscriber and Publisher to same topic inside single
+ * application.
+ *
  * <p>Each instance of {@link JRos2Client} creates a new RTPS participant, which starts to listen
- * certain RTPS ports. Currently {@link JRos2Client} does not allow same RTPS participant to
- * publish and subscribe to same topic at the same time. Instead, both Subscriber and Publisher
- * need to run under different participants. To achieve this, two separate instances of {@link JRos2Client}
- * can be used as shown in this example.
- * 
- * <p>By default, subscriber always runs on its own thread after it was subscribed with
- * {@link JRosClient#subscribe(String, Class, java.util.concurrent.Flow.Subscriber)}.
- * Which means, it is possible on same thread run Publisher and then register Subscriber as shown in the example.
+ * certain RTPS ports. Currently {@link JRos2Client} does not allow same RTPS participant to publish
+ * and subscribe to same topic at the same time. Instead, both Subscriber and Publisher need to run
+ * under different participants. To achieve this, two separate instances of {@link JRos2Client} can
+ * be used as shown in this example.
+ *
+ * <p>By default, subscriber always runs on its own thread after it was subscribed with {@link
+ * JRosClient#subscribe(String, Class, java.util.concurrent.Flow.Subscriber)}. Which means, it is
+ * possible on same thread run Publisher and then register Subscriber as shown in the example.
+ *
+ * @author lambdaprime intid@protonmail.com
  */
 public class PublisherSubscriberApp {
 
@@ -48,14 +50,15 @@ public class PublisherSubscriberApp {
             // register a new publisher for a new topic with ROS
             pubClient.publish(publisher);
             // register a new subscriber
-            subClient.subscribe(new TopicSubscriber<>(StringMessage.class, topicName) {
-                @Override
-                public void onNext(StringMessage item) {
-                    System.out.println(item);
-                    // request next message
-                    getSubscription().get().request(1);
-                }
-            });
+            subClient.subscribe(
+                    new TopicSubscriber<>(StringMessage.class, topicName) {
+                        @Override
+                        public void onNext(StringMessage item) {
+                            System.out.println(item);
+                            // request next message
+                            getSubscription().get().request(1);
+                        }
+                    });
             while (!cli.wasEnterKeyPressed()) {
                 publisher.submit(new StringMessage().withData("Hello ROS"));
                 System.out.println("Published");

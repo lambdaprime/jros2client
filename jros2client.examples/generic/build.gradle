@@ -1,12 +1,13 @@
 plugins {
-    id 'java'
+  id 'com.diffplug.spotless'
+  id 'java'
 }
 
 apply plugin : 'eclipse'
 
 repositories {
-    mavenCentral()
-    mavenLocal()
+  mavenCentral()
+  mavenLocal()
 }
 
 dependencies {
@@ -17,9 +18,12 @@ sourceCompatibility = '17'
 targetCompatibility = '17'
 
 sourceSets {
-    main {
-        java {
-            srcDirs += ["src"]
-        }
+  main {
+    java {
+      srcDirs += ["src"]
     }
+  }
 }
+
+// run spotless and format code before the build
+classes.dependsOn spotlessApply
