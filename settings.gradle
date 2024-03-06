@@ -1,3 +1,4 @@
 include 'jros2client'
-include 'jros2client.examples'
+include 'jros2client.examples-generic'
+project(':jros2client.examples-generic').projectDir = new File('jros2client.examples/generic')
 include 'jros2client.tests'
