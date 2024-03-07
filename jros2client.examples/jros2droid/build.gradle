@@ -1,0 +1,114 @@
+plugins {
+  id 'com.android.application' version '8.2.0' apply false
+}
+
+apply plugin: 'com.android.application'
+apply plugin : 'eclipse'
+
+def androidSdkVersion = 34
+def javaVersion = 17
+
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(javaVersion)
+  }
+}
+
+dependencies {
+  implementation 'io.github.lambdaprime:jros2client:6.0-SNAPSHOT'
+}
+
+android {
+  namespace 'io.lambdaprime.jros2droid'
+  compileSdkVersion androidSdkVersion
+
+  defaultConfig {
+    targetSdkVersion androidSdkVersion
+    minSdkVersion androidSdkVersion
+  }
+
+  lintOptions {
+    abortOnError false
+  }
+
+  sourceSets {
+    main {
+      manifest.srcFile 'AndroidManifest.xml'
+      res.srcDirs = ['res']
+      assets.srcDirs = ['assets']
+    }
+  }
+
+  buildTypes {
+    debug {
+      //minifyEnabled true
+      proguardFiles 'proguard.cfg'
+    }
+    release {
+      minifyEnabled true
+      proguardFiles 'proguard.cfg'
+      zipAlignEnabled true
+    }
+  }
+}
+
+/*
+ * Eclipse configuration.
+ *
+ * Copies all classpath dependencies into elibs folder.
+ * For aar files it extracts /classes.jar file and copy it instead.
+ */
+def elibDir = new java.io.File(project.projectDir, '/elibs')
+
+sourceSets {
+  main {
+    java {
+      srcDirs = ["src/main/java"]
+    }
+  }
+}
+
+configurations {
+  customConfig.extendsFrom implementation
+}
+task copyDependenciesForEclipse(type: Copy) {
+mkdir elibDir
+    configurations.customConfig.filter {it.name.endsWith 'aar'}.each { File file -> copy {
+        from zipTree(file)
+        include 'classes.jar'
+        into elibDir
+        rename { String fileName ->
+            fileName.replace('classes.jar', file.getName() + '.jar')
+        }
+    }}
+}
+eclipse.classpath.file {
+    whenMerged { classpath ->
+        var extClasspath = new HashSet<File>();
+        java.nio.file.Files.list(elibDir.toPath()).map(java.nio.file.Path::toFile).forEach(extClasspath::add);
+        android.applicationVariants.each { variant ->
+            variant.javaCompile.classpath.getFiles().stream().forEach(extClasspath::add)
+        }
+        android.getBootClasspath().each { path ->
+            extClasspath.add(path)
+        }
+        extClasspath.stream().forEach(f -> {
+            def lib = new org.gradle.plugins.ide.eclipse.model.Library(fileReference(f))
+            lib.exported = true
+            classpath.entries << lib
+        });
+    }
+}
+clean {
+    delete "${elibDir}"
+}
+eclipseClasspath.dependsOn copyDependenciesForEclipse
+
+/*
+ * gradlew requires execution of gradle-wrapper.jar which trustworthy needs to
+ * be checked everytime when it is updated (otherwise it do not seems secure)
+ * To avoid using it we rely on manual version check
+ */
+def requiredGradleVersion = "8.3"
+if ("$gradle.gradleVersion" != "$requiredGradleVersion")
+  throw new RuntimeException("Running gradle version $gradle.gradleVersion, required $requiredGradleVersion");
