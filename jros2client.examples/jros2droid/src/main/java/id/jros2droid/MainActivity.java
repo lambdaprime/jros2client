@@ -22,12 +22,17 @@ import static id.jros2droid.Constants.TAG;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.CursorAdapter;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import id.jros2client.JRos2ClientConfiguration;
 import id.jros2client.JRos2ClientFactory;
 import id.jrosclient.TopicSubscriber;
 import id.jrosmessages.std_msgs.StringMessage;
 import id.xfunction.function.Unchecked;
 import id.jros2droid.R;
+import id.xfunction.lang.XThread;
+import id.xfunction.logging.XLogger;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.concurrent.Executors;
@@ -39,10 +44,35 @@ import pinorobotics.rtpstalk.RtpsTalkConfiguration;
  */
 public class MainActivity extends Activity {
 
+    private static final XLogger LOGGER = XLogger.getLogger(MainActivity.class);
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        var logView = (ListView) findViewById(R.id.logView);
+        var cursor = new LogCursor();
+        logView.setAdapter(new SimpleCursorAdapter(this, R.layout.item, cursor, new String[] {"message"}, new int[] {R.id.message},
+                CursorAdapter.FLAG_AUTO_REQUERY));
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int prev = cursor.getCount();
+                while (true) {
+                    if (cursor.getCount() != prev) {
+                        logView.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                cursor.requery();
+                                logView.setSelection(cursor.getCount());
+                            }
+                        });
+                        prev = cursor.getCount();
+                    }
+                    XThread.sleep(1000);
+                }
+            }
+        }).start();
         setupLogging();
         Executors.newSingleThreadExecutor().execute(() -> {
             run();
@@ -76,6 +106,7 @@ public class MainActivity extends Activity {
             @Override
             public void onNext(StringMessage item) {
                 Log.i(TAG, "received " + item);
+                LOGGER.info(item.toString());
                 // request next message
                 getSubscription().get().request(1);
             }

@@ -6,6 +6,10 @@ Additionally it is used for **jros2client** Android integration tests.
 
 - Android 14
 
+# Android emulator
+
+Android emulator does not support [multicast](https://developer.android.com/studio/run/emulator-networking#networkinglimitations) which means that **jros2client** would not be able to detect ROS nodes.
+
 # Build
 
 ```
