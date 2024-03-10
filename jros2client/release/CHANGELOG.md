@@ -1,3 +1,15 @@
+# Version 6
+
+- Updating jros2droid to show live logs
+- Renaming jros2droid namespace
+- Adding jros2droid example
+- Adding spotless to examples
+- Moving all examples under generic folder
+- Updating jros2messages to v6.0-SNAPSHOT
+- Issue #10 Updating rtpstalk to v7.0
+
+[jros2client-v6.0.zip](https://github.com/lambdaprime/jros2client/raw/main/jros2client/release/jros2client-v6.0.zip)
+
 # Version 5
 
 - Updating jrosclient:8.0, jros2messages:5.0, rtpstalk:6.0

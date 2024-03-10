@@ -21,7 +21,8 @@
  *
  * <p>For usage examples see <a href="http://portal2.atwebpages.com/jrosclient">Documentation</a>
  *
- * @see <a href= "https://github.com/lambdaprime/jros2client/releases">Download</a>
+ * @see <a href=
+ *     "https://github.com/lambdaprime/jros2client/blob/main/jros2client/release/CHANGELOG.md">Download</a>
  * @see <a href="https://github.com/lambdaprime/jros2client">GitHub repository</a>
  * @author lambdaprime intid@protonmail.com
  */
