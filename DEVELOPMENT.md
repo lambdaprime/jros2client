@@ -10,7 +10,7 @@ gradle clean build
 
 ## With Eclipse
 
-- Build eclipse projects:
+- Build Eclipse projects:
 
 ``` bash
 gradle eclipse
@@ -28,4 +28,6 @@ gradle eclipse
 - Update CHANGELOG.md with new release (for changelog generation use `git log --format=%s`)
 - Commit changes
 - Push
+- Make sure that new release did not make any changes to existing examples. If it did then update corresponding examples in the documentation.
 - Upload documentation to website
+- Update "bootstrap" project

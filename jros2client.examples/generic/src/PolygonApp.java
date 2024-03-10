@@ -61,7 +61,9 @@ public class PolygonApp {
     }
 
     /** Example of custom message definition */
-    @MessageMetadata(name = PolygonMessage.NAME)
+    @MessageMetadata(
+            name = PolygonMessage.NAME
+            /*fields = {"points"} /* This parameter is optional because message has only one field */ )
     public static class PolygonMessage implements Message {
 
         static final String NAME = "geometry_msgs/Polygon";
@@ -75,7 +77,9 @@ public class PolygonApp {
     }
 
     /** Example of custom message definition */
-    @MessageMetadata(name = PolygonStampedMessage.NAME)
+    @MessageMetadata(
+            name = PolygonStampedMessage.NAME,
+            fields = {"header", "polygon"})
     public static class PolygonStampedMessage implements Message {
 
         static final String NAME = "geometry_msgs/PolygonStamped";

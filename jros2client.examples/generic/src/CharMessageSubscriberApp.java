@@ -36,7 +36,7 @@ import java.util.Arrays;
  * to be mapped into jrosclient message {@link CharMessage}
  *
  * <p>Use this example together with <a
- * href="https://github.com/lambdaprime/jros2client/tree/main/jros2client.examples">custom_msgs
+ * href="https://github.com/lambdaprime/jros2client/tree/main/jros2client.examples/generic/ws2/src/custom_msgs">custom_msgs
  * node</a>.
  *
  * @author lambdaprime intid@protonmail.com
@@ -64,7 +64,9 @@ public class CharMessageSubscriberApp {
     }
 
     /** Example of custom message definition */
-    @MessageMetadata(name = CharMessage.NAME)
+    @MessageMetadata(
+            name = CharMessage.NAME,
+            fields = {"letter", "data"})
     public static class CharMessage implements Message {
 
         static final String NAME = "custom_msgs/CharMessage";
