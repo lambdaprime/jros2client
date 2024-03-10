@@ -19,7 +19,7 @@ dependencies {
 }
 
 android {
-  namespace 'io.lambdaprime.jros2droid'
+  namespace 'id.jros2droid'
   compileSdkVersion androidSdkVersion
 
   defaultConfig {

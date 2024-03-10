@@ -23,5 +23,5 @@ Make sure to remove JRE from the dependencies because all Java classes will be a
 # Logs
 
 ```
-adb shell cat /storage/emulated/0/Android/data/io.lambdaprime.jros2droid/files/jros2client-debug.log
+adb shell cat /storage/emulated/0/Android/data/id.jros2droid/files/jros2client-debug.log
 ```

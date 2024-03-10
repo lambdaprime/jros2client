@@ -15,9 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.lambdaprime.jros2droid;
+package id.jros2droid;
 
-import static io.lambdaprime.jros2droid.Constants.TAG;
+import static id.jros2droid.Constants.TAG;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -27,6 +27,7 @@ import id.jros2client.JRos2ClientFactory;
 import id.jrosclient.TopicSubscriber;
 import id.jrosmessages.std_msgs.StringMessage;
 import id.xfunction.function.Unchecked;
+import id.jros2droid.R;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.concurrent.Executors;
