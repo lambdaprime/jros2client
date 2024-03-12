@@ -16,7 +16,7 @@ Android emulator does not support [multicast](https://developer.android.com/stud
 gradle assembleDebug installDebug
 ```
 
-# Import to eclipse
+# Import to Eclipse
 
 ```
 gradle eclipse

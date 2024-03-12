@@ -25,9 +25,10 @@ import android.Manifest;
 public class SetupActivity extends RequestPermissionsActivity {
 
     public SetupActivity() {
-        super(MainActivity.class, new String[] {
-            Manifest.permission.ACCESS_NETWORK_STATE,
-            Manifest.permission.INTERNET
-        });
+        super(
+                MainActivity.class,
+                new String[] {
+                    Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.INTERNET
+                });
     }
 }

@@ -31,9 +31,8 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 /**
- * This activity checks if all permissions are available and if not it
- * requests user to grant them.
- * 
+ * This activity checks if all permissions are available and if not it requests user to grant them.
+ *
  * @author lambdaprime intid@protonmail.com
  */
 public class RequestPermissionsActivity extends Activity {
@@ -43,8 +42,8 @@ public class RequestPermissionsActivity extends Activity {
     private Class<? extends Activity> targetActivity;
     private String[] permissions;
 
-    public RequestPermissionsActivity(Class<? extends Activity> targetActivity,
-        String[] permissions) {
+    public RequestPermissionsActivity(
+            Class<? extends Activity> targetActivity, String[] permissions) {
         this.targetActivity = targetActivity;
         this.permissions = permissions;
     }
@@ -57,28 +56,21 @@ public class RequestPermissionsActivity extends Activity {
         }
     }
 
-    /**
-     * Called before control is passed to target activity
-     */
-    protected void onPermissionsGranted() {
-
-    }
+    /** Called before control is passed to target activity */
+    protected void onPermissionsGranted() {}
 
     /**
-     * Checks if app has specified permissions and:
-     * - if it does return true
-     * - if it does not then return false and async ask user to grant permissions
+     * Checks if app has specified permissions and: - if it does return true - if it does not then
+     * return false and async ask user to grant permissions
+     *
      * @return true if all permissions are already present
      */
     private boolean checkAndRequestPermissions(String[] permissions) {
-        if (Build.VERSION.SDK_INT >= 23)
-            return !requestPermissions(permissions);
+        if (Build.VERSION.SDK_INT >= 23) return !requestPermissions(permissions);
         return true;
     }
 
-    /**
-     * Is called when user granted ALL requested permissions (including overlay permissions)
-     */
+    /** Is called when user granted ALL requested permissions (including overlay permissions) */
     private void permissionsGranted() {
         Log.i(TAG, "All permissions are set");
         onPermissionsGranted();
@@ -88,33 +80,37 @@ public class RequestPermissionsActivity extends Activity {
 
     private boolean requestPermissions(String[] permissions) {
         List<String> missing = new ArrayList<>();
-        for (String permission: permissions) {
+        for (String permission : permissions) {
             if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED)
                 missing.add(permission);
         }
-        if (missing.isEmpty())
-            return false;
+        if (missing.isEmpty()) return false;
         Log.i(TAG, "Missing permissions " + missing);
         requestPermissions(missing.toArray(new String[0]), REQUEST_CODE);
         return true;
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(
+            int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == REQUEST_CODE) {
-            var denied = 
-            IntStream.range(0, grantResults.length).filter(i -> grantResults[i] == PackageManager.PERMISSION_DENIED)
-                .mapToObj(i -> permissions[i])
-                .toList();
+            var denied =
+                    IntStream.range(0, grantResults.length)
+                            .filter(i -> grantResults[i] == PackageManager.PERMISSION_DENIED)
+                            .mapToObj(i -> permissions[i])
+                            .toList();
             if (!denied.isEmpty()) {
-                Toast.makeText(this, "Setup failed, no permissions granted for: " + denied, Toast.LENGTH_SHORT).show();
+                Toast.makeText(
+                                this,
+                                "Setup failed, no permissions granted for: " + denied,
+                                Toast.LENGTH_SHORT)
+                        .show();
             } else {
-                    permissionsGranted();
+                permissionsGranted();
             }
         } else {
             Toast.makeText(this, "Setup failed, wrong request code", Toast.LENGTH_SHORT).show();
         }
         finish();
     }
-
 }

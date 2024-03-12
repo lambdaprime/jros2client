@@ -30,7 +30,6 @@ import id.jros2client.JRos2ClientFactory;
 import id.jrosclient.TopicSubscriber;
 import id.jrosmessages.std_msgs.StringMessage;
 import id.xfunction.function.Unchecked;
-import id.jros2droid.R;
 import id.xfunction.lang.XThread;
 import id.xfunction.logging.XLogger;
 import java.io.IOException;
@@ -45,38 +44,49 @@ import pinorobotics.rtpstalk.RtpsTalkConfiguration;
 public class MainActivity extends Activity {
 
     private static final XLogger LOGGER = XLogger.getLogger(MainActivity.class);
-    
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         var logView = (ListView) findViewById(R.id.logView);
         var cursor = new LogCursor();
-        logView.setAdapter(new SimpleCursorAdapter(this, R.layout.item, cursor, new String[] {"message"}, new int[] {R.id.message},
-                CursorAdapter.FLAG_AUTO_REQUERY));
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int prev = cursor.getCount();
-                while (true) {
-                    if (cursor.getCount() != prev) {
-                        logView.post(new Runnable() {
+        logView.setAdapter(
+                new SimpleCursorAdapter(
+                        this,
+                        R.layout.item,
+                        cursor,
+                        new String[] {"message"},
+                        new int[] {R.id.message},
+                        CursorAdapter.FLAG_AUTO_REQUERY));
+        new Thread(
+                        new Runnable() {
                             @Override
                             public void run() {
-                                cursor.requery();
-                                logView.setSelection(cursor.getCount());
+                                int prev = cursor.getCount();
+                                while (true) {
+                                    if (cursor.getCount() != prev) {
+                                        logView.post(
+                                                new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        cursor.requery();
+                                                        logView.setSelection(cursor.getCount());
+                                                    }
+                                                });
+                                        prev = cursor.getCount();
+                                    }
+                                    XThread.sleep(1000);
+                                }
                             }
-                        });
-                        prev = cursor.getCount();
-                    }
-                    XThread.sleep(1000);
-                }
-            }
-        }).start();
+                        })
+                .start();
         setupLogging();
-        Executors.newSingleThreadExecutor().execute(() -> {
-            run();
-        });
+        Executors.newSingleThreadExecutor()
+                .execute(
+                        () -> {
+                            run();
+                        });
     }
 
     private void setupLogging() {
@@ -86,7 +96,7 @@ public class MainActivity extends Activity {
             Files.createDirectories(outputFolder.toPath());
         } catch (IOException e) {
             e.printStackTrace();
-        }        
+        }
         var loggingResource = "logging-jros2client.properties";
         var inputStream = this.getClass().getClassLoader().getResourceAsStream(loggingResource);
         if (inputStream == null) {
@@ -97,20 +107,27 @@ public class MainActivity extends Activity {
     }
 
     private void run() {
-        var client = new JRos2ClientFactory().createClient(new JRos2ClientConfiguration(
-                new RtpsTalkConfiguration.Builder().builtinEnpointsPort(8012).userEndpointsPort(8013).build()));
-//        var client = new JRos2ClientFactory().createClient();
+        var client =
+                new JRos2ClientFactory()
+                        .createClient(
+                                new JRos2ClientConfiguration(
+                                        new RtpsTalkConfiguration.Builder()
+                                                .builtinEnpointsPort(8012)
+                                                .userEndpointsPort(8013)
+                                                .build()));
+        //        var client = new JRos2ClientFactory().createClient();
         var topicName = "/helloRos";
         // register a new subscriber
-        client.subscribe(new TopicSubscriber<>(StringMessage.class, topicName) {
-            @Override
-            public void onNext(StringMessage item) {
-                Log.i(TAG, "received " + item);
-                LOGGER.info(item.toString());
-                // request next message
-                getSubscription().get().request(1);
-            }
-        });
+        client.subscribe(
+                new TopicSubscriber<>(StringMessage.class, topicName) {
+                    @Override
+                    public void onNext(StringMessage item) {
+                        Log.i(TAG, "received " + item);
+                        LOGGER.info(item.toString());
+                        // request next message
+                        getSubscription().get().request(1);
+                    }
+                });
 
         // usually we need to close client once we are done
         // but here we keep it open so that subscriber will keep
