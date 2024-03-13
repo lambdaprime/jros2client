@@ -1,5 +1,10 @@
 <resources>
 
     <string name="app_name">jros2droid</string>
+    <string name="description">Publish or subscribe to ROS2 topics of type std_msgs/String</string>
+    <string name="topicName">Topic name:</string>
+    <string name="publish">Publish</string>
+    <string name="subscribe">Subscribe</string>
+    <string name="stop">Stop</string>
 
 </resources>

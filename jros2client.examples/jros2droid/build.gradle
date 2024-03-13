@@ -16,7 +16,7 @@ java {
 }
 
 dependencies {
-  implementation 'io.github.lambdaprime:jros2client:6.0-SNAPSHOT'
+  implementation 'io.github.lambdaprime:jros2client:6.0'
 }
 
 android {

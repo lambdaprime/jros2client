@@ -43,6 +43,12 @@ javadoc {
   options.noNavBar = true
   // ignore missing @return, @param etc
   options.addBooleanOption('Xdoclint:all,-missing', true)
+  // should point to location of element-list files
+  options.addStringOption('link', 'http://portal2.atwebpages.com/jrosclient/javadoc/jros2messages/');
+  options.addStringOption('link', 'http://pinoweb.freetzi.com/rtpstalk/javadoc/');
+  options.addStringOption('link', 'http://portal2.atwebpages.com/jrosclient/javadoc/jros2messages/');
+  options.addStringOption('link', 'http://portal2.atwebpages.com/jrosclient/javadoc/jrosmessages/');
+  options.addStringOption('link', 'http://portal2.atwebpages.com/jrosclient/javadoc/jrosclient/');
   // to support @inheritDoc we need to provide sources for inherited
   // classes as part of '--module-source-path' option
   // we use "Module-pattern form" for that. It replaces * with
