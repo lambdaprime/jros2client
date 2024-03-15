@@ -26,6 +26,21 @@ android {
   defaultConfig {
     targetSdkVersion androidSdkVersion
     minSdkVersion androidSdkVersion
+
+    // read jros2client version
+    def propsFile = java.nio.file.Paths.get("../../gradle.properties")
+    def libVersion = java.nio.file.Files
+      .readAllLines(propsFile)
+      .stream()
+      .filter(l -> l.startsWith("version"))
+      .map(l -> l.replaceAll("version = (.*)", '$1'))
+      .peek(System.out::println)
+      .findFirst()
+      .orElseThrow(() -> new RuntimeException("jros2client version is missing inside " + propsFile))
+    println libVersion
+    versionCode 1
+    versionName "${libVersion}"
+    archivesBaseName = "${namespace}-v${versionName}"
   }
 
   lintOptions {

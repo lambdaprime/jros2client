@@ -84,6 +84,7 @@ task copyExamples(type: Copy) {
 task createPackage(type: Copy, dependsOn: [copyLibs, copyExamples]) {
   from "${project.rootDir}/README.md"
   from "${project.rootDir}/LICENSE-2.0.txt"
+  from "${project.rootDir}/jros2client.examples/jros2droid/build/outputs/apk/debug/id.jros2droid-v${rootProject.version}-debug.apk"
   into packageDir
 }
 

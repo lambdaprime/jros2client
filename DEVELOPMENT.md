@@ -28,6 +28,6 @@ gradle eclipse
 - Update CHANGELOG.md with new release (for changelog generation use `git log --format=%s`)
 - Commit changes
 - Push
-- Make sure that new release did not make any changes to existing examples. If it did then update corresponding examples in the documentation.
+- Make sure that new release did not make any changes to existing examples and "jros2droid". If it did then update corresponding examples in the documentation.
 - Upload documentation to website
 - Update "bootstrap" project
