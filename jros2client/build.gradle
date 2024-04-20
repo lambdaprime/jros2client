@@ -4,13 +4,18 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath "io.github.lambdaprime:id.xfunction:14.0"
+    classpath "io.github.lambdaprime:id.xfunction:23.0"
   }
 }
 
 plugins {
   id 'com.diffplug.spotless'
+  // only if you build Java library
   id 'java-library'
+}
+
+boolean isReleaseBuild() {
+  return version != null && version.matches("\\d+[.\\d+]*");
 }
 
 apply plugin : 'eclipse'
@@ -23,15 +28,20 @@ eclipse.classpath.file {
 }
 
 dependencies {
-  api "io.github.lambdaprime:jrosclient:8.0"
-  api "io.github.lambdaprime:jros2messages:6.0"
-  api "io.github.pinorobotics:rtpstalk:7.0"
-  api "io.opentelemetry:opentelemetry-api:1.34.1"
+  zzApiDependencies.split(',').each { api it }
 }
 
 jar {
   manifest { 
-    attributes 'Implementation-Version': "${rootProject.version}"
+    attributes 'Implementation-Version': "${version}"
+  }
+}
+
+sourceSets {
+  main {
+    java {
+      srcDirs += ["src/main/gen/java"]
+    }
   }
 }
 
@@ -43,40 +53,50 @@ javadoc {
   options.noNavBar = true
   // ignore missing @return, @param etc
   options.addBooleanOption('Xdoclint:all,-missing', true)
-  // should point to location of element-list files
-  options.addMultilineStringsOption("link").value = [
-    "http://portal2.atwebpages.com/jrosclient/javadoc/jrosclient/",
-    "http://portal2.atwebpages.com/jrosclient/javadoc/jrosmessages/",
-    "http://portal2.atwebpages.com/jrosclient/javadoc/jros2messages/",
-    "http://pinoweb.freetzi.com/rtpstalk/javadoc/",
-  ]
+  options.addStringOption('-show-packages', 'exported')
+  if (!zzJavadocLinks.isBlank()) {
+    // should point to location of element-list files
+    options.addMultilineStringsOption("link").value = Arrays.asList(zzJavadocLinks.split(','))
+  }
+  // Gradle does not support exclude correctly:
+  // https://github.com/gradle/gradle/issues/19726
+  def sourceSetDirectories = sourceSets
+    .main
+    .java
+    .sourceDirectories
+    .getFiles()
+    .stream()
+    .map({f -> f.toString() })
+    .collect(java.util.stream.Collectors.joining(":"))
+  def moduleSourcePath = []
+  moduleSourcePath += "${zzName}=" + sourceSetDirectories
   // to support @inheritDoc we need to provide sources for inherited
   // classes as part of '--module-source-path' option
-  // we use "Module-pattern form" for that. It replaces * with
-  // matched folder name which should also math module name itself
+  // we use "Module-specific form" for that.
   // https://docs.oracle.com/en/java/javase/18/docs/specs/man/javac.html#the-module-source-path-option
-  options.addStringOption('-module-source-path',
-   "${project.rootDir}/*/src/main/java:" +
-   "${project.rootDir}/../jrosclient/*/src/main/java")
-  exclude 'id/jros2client/impl/**'
+  zzJavadocInheritFrom.split(',').findAll{ !it.isBlank() }.each {
+    moduleSourcePath += "${it}=${project.rootDir}/../${it}/${it}/src/main/java:${project.rootDir}/../${it}/${it}/src/main/gen/java"
+  }
+  options.addMultilineStringsOption("-module-source-path").value = moduleSourcePath.stream().map(Object::toString).toList()
+  exclude "${zzNamespace}/${zzName}/impl/**"
 }
 
-def packageDir = "$buildDir/package/${projectName}"
+def packageDir = "$buildDir/package/${zzName}"
 
 task createRelease(type: Zip) {
-  archiveFileName = "$releaseFileName"
-  destinationDirectory = file("$projectDir/release")
-  from file("$packageDir/..")
+    archiveFileName = "$releaseFileName"
+    destinationDirectory = file("$projectDir/release")
+    from file("$packageDir/..")
 }
 
 task copyLibs(type: Copy) {
-  from configurations.runtimeClasspath
-  from jar.archiveFile
-  into "${packageDir}/libs"
+    from configurations.runtimeClasspath
+    from jar.archiveFile
+    into "${packageDir}/libs"
 }
 
 task copyExamples(type: Copy) {
-  from("${project.rootDir}/jros2client.examples/generic/src") {
+  from("${project.rootDir}/${zzName}.examples/generic/src") {
     include "**"
   }
   into "${packageDir}/examples"
@@ -85,7 +105,7 @@ task copyExamples(type: Copy) {
 task createPackage(type: Copy, dependsOn: [copyLibs, copyExamples]) {
   from "${project.rootDir}/README.md"
   from "${project.rootDir}/LICENSE-2.0.txt"
-  from "${project.rootDir}/jros2client.examples/jros2droid/build/outputs/apk/debug/id.jros2droid-v${rootProject.version}-debug.apk"
+  from "${project.rootDir}/${zzName}.examples/jros2droid/build/outputs/apk/debug/id.jros2droid-v${rootProject.version}-debug.apk"
   into packageDir
 }
 
@@ -102,14 +122,14 @@ clean.dependsOn cleanRelease
 classes.dependsOn spotlessApply
 
 task updateVersion() {
-  // update version only when it is specified and non SNAPSHOT version is built
-  // 'unspecified' is the default value for the version in Gradle if it is not set
-  if (!version || version == "unspecified" || version.contains("SNAPSHOT")) return;
+  // update version only during release build
+  if (!isReleaseBuild()) return;
   println "Updating version to " + version
   new id.xfunction.text.Substitutor()
     .withRegexpSupport()
     .substitute(java.nio.file.Paths.get("${project.rootDir}/README.md"), Map.of(
-      "io.github.lambdaprime:jros2client:[0-9.]+", "io.github.lambdaprime:jros2client:" + version
+      "io.github.${zzNamespace}:${zzName}:[0-9.]+".toString(),
+      "io.github.${zzNamespace}:${zzName}:${version}".toString()
     ));
 }
 createRelease.dependsOn updateVersion
@@ -140,13 +160,13 @@ if (project.hasProperty('publish')) {
   publishing {
     publications {
       mavenJava(MavenPublication) {
-        artifactId = 'jros2client'
-        groupId = 'io.github.lambdaprime'
+        artifactId = zzName
+        groupId = "io.github.${zzNamespace}"
         from components.java
         pom {
-          name = 'jros2client'
-          description = 'Java module to interact with ROS 2 (Robot Operating System)'
-          url = 'http://portal2.atwebpages.com/jrosclient'
+          name = zzName
+          description = zzDescription
+          url = zzUrl
 
           licenses {
             license {
@@ -157,13 +177,13 @@ if (project.hasProperty('publish')) {
 
           developers {
             developer {
-              id = 'lambdaprime'
-              email = 'intid@protonmail.com'
+              id = zzDevName
+              email = zzDevEmail
             }
           }
 
           scm {
-            url = 'https://github.com/lambdaprime/jros2client'
+            url = zzRepoUrl
           }
         }
       }
@@ -176,7 +196,7 @@ if (project.hasProperty('publish')) {
         }
         url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
       }
-    }    
+    }
   }
 
   if (project.hasProperty('signing.secretKeyRingFile')) {
