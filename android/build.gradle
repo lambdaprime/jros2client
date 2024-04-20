@@ -46,4 +46,8 @@ task copySources(type: Copy) {
   into "src/main/java"
   exclude "**/module-info.java"
 }
+task cleanSource(type: Delete) {
+  delete "src/main/java"
+}
 preBuild.dependsOn copySources
+clean.dependsOn cleanSource
