@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import id.jros2client.JRos2ClientConfiguration;
 import id.jros2client.JRos2ClientFactory;
 import id.jrosclient.TopicSubmissionPublisher;
 import id.jrosmessages.std_msgs.StringMessage;
@@ -27,7 +28,9 @@ import id.jrosmessages.std_msgs.StringMessage;
 public class PublisherApp {
 
     public static void main(String[] args) throws Exception {
-        var client = new JRos2ClientFactory().createClient();
+        var configBuilder = new JRos2ClientConfiguration.Builder();
+        // use configBuilder to override default parameters (network interface, RTPS settings etc)
+        var client = new JRos2ClientFactory().createClient(configBuilder.build());
         String topicName = "/helloRos";
         var publisher = new TopicSubmissionPublisher<>(StringMessage.class, topicName);
         // register a new publisher for a new topic with ROS
