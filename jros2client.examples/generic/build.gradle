@@ -5,6 +5,13 @@ plugins {
 
 apply plugin : 'eclipse'
 
+eclipse.classpath.file {
+  // instruct eclipse plugin to put everything to classpath
+  whenMerged {
+    entries.findAll { it.kind == 'lib' || it.kind == 'src' }.each { it.entryAttributes['module'] = 'false' }
+  }
+}
+
 repositories {
   mavenCentral()
   mavenLocal()

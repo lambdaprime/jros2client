@@ -18,7 +18,7 @@
 package id.jros2client.impl;
 
 import id.jros2client.impl.rmw.DdsNameMapper;
-import id.jros2messages.MessageSerializationUtils;
+import id.jros2messages.Ros2MessageSerializationUtils;
 import id.jrosclient.utils.RosNameUtils;
 import pinorobotics.rtpstalk.RtpsTalkClient;
 import pinorobotics.rtpstalk.RtpsTalkConfiguration;
@@ -45,7 +45,7 @@ public class ObjectsFactory {
     }
 
     public MessageUtils createMessageUtils() {
-        return new MessageUtils(new MessageSerializationUtils());
+        return new MessageUtils(new Ros2MessageSerializationUtils());
     }
 
     public DdsNameMapper createNameMapper() {

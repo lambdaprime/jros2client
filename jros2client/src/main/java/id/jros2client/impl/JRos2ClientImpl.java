@@ -77,6 +77,7 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
     private XLogger logger;
     private MessageUtils messageUtils;
     private JRos2ClientConfiguration config;
+    private boolean isClosed;
 
     public JRos2ClientImpl(JRos2ClientConfiguration config, ObjectsFactory factory) {
         this.config = config;
@@ -159,6 +160,7 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
     @Override
     protected void onClose() {
         logger.fine("Close");
+        isClosed = true;
         rtpsTalkClient.close();
         CLIENT_CLOSE_CALLS_METER.record(1, JRos2ClientConstants.METRIC_ATTRS);
     }
@@ -166,5 +168,10 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
     @Override
     public JRos2ClientConfiguration getConfiguration() {
         return config;
+    }
+
+    @Override
+    public boolean isClosed() {
+        return isClosed;
     }
 }

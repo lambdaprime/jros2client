@@ -17,7 +17,7 @@
  */
 package id.jros2client.impl;
 
-import id.jros2messages.MessageSerializationUtils;
+import id.jros2messages.Ros2MessageSerializationUtils;
 import id.jrosmessages.Message;
 import id.xfunction.logging.XLogger;
 import java.util.Optional;
@@ -30,9 +30,9 @@ import pinorobotics.rtpstalk.messages.RtpsTalkDataMessage;
 public class MessageUtils {
 
     private static final XLogger LOGGER = XLogger.getLogger(MessageUtils.class);
-    private MessageSerializationUtils serializationUtils;
+    private Ros2MessageSerializationUtils serializationUtils;
 
-    public MessageUtils(MessageSerializationUtils serializationUtils) {
+    public MessageUtils(Ros2MessageSerializationUtils serializationUtils) {
         this.serializationUtils = serializationUtils;
     }
 

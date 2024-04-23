@@ -22,7 +22,7 @@ import static java.util.stream.Collectors.toList;
 import id.jros2client.JRos2Client;
 import id.jros2client.JRos2ClientConfiguration;
 import id.jros2client.JRos2ClientFactory;
-import id.jros2messages.MessageSerializationUtils;
+import id.jros2messages.Ros2MessageSerializationUtils;
 import id.jros2messages.sensor_msgs.ImageMessage;
 import id.jrosclient.TopicSubmissionPublisher;
 import id.jrosclient.TopicSubscriber;
@@ -177,7 +177,7 @@ public class JRos2ClientTests {
     public void test_publish_message_over_1Mb(Ros2Commands commands) throws Exception {
         ros2Commands = commands;
         var message =
-                new MessageSerializationUtils()
+                new Ros2MessageSerializationUtils()
                         .read(
                                 Files.readAllBytes(
                                         Paths.get("samples/ImageMessage/seattle_ImageMessage.bin")),
