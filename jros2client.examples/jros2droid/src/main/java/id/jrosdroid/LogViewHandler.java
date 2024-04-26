@@ -15,20 +15,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package id.jros2droid;
+package id.jrosdroid;
 
-import android.Manifest;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Filter;
+import java.util.logging.LogRecord;
+import java.util.logging.StreamHandler;
 
 /**
  * @author lambdaprime intid@protonmail.com
  */
-public class SetupActivity extends RequestPermissionsActivity {
+public class LogViewHandler extends StreamHandler {
 
-    public SetupActivity() {
-        super(
-                MainActivity.class,
-                new String[] {
-                    Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.INTERNET
-                });
+    public static List<String> logs = new CopyOnWriteArrayList<String>();
+
+    @Override
+    public synchronized void publish(LogRecord record) {
+        var levelValue = getLevel().intValue();
+        if (record == null) return;
+        if (record.getLevel().intValue() < levelValue) return;
+        final Filter filter = getFilter();
+        if (filter != null && !filter.isLoggable(record)) return;
+        logs.add(getFormatter().format(record));
     }
 }

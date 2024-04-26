@@ -94,7 +94,7 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
             String topic, Class<M> messageClass, Subscriber<M> subscriber)
             throws JRosClientException {
         startLazy();
-        logger.fine("Subscribing to {0} type {1}", topic, messageClass.getName());
+        logger.info("Subscribing to {0} type {1}", topic, messageClass.getName());
         var messageName = rosNameMapper.asFullyQualifiedDdsTypeName(messageClass);
         topic = rosNameMapper.asFullyQualifiedDdsTopicName(topic, messageClass);
         var transformer =
@@ -108,7 +108,7 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
     public <M extends Message> void publish(TopicPublisher<M> publisher)
             throws JRosClientException {
         startLazy();
-        logger.fine(
+        logger.info(
                 "Publishing to {0} type {1}",
                 publisher.getTopic(), publisher.getMessageClass().getName());
         var messageClass = publisher.getMessageClass();

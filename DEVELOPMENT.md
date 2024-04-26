@@ -24,6 +24,9 @@ gradle eclipse
 - Close version in gradle.properties
 - Run `gradle clean build javadoc`
 - Publish
+- Update [jros2droid](jros2client.examples/jros2droid/build.gradle) to new jros2client version and build it
+- Install in Android
+- Run `gradle :jros2client:createRelease -PaddJRosDroid`
 - Open next SNAPSHOT version
 - Update CHANGELOG.md with new release (for changelog generation use `git log --format=%s`)
 - Commit changes

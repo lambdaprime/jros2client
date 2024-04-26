@@ -15,9 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package id.jros2droid;
+package id.jrosdroid;
 
-import static id.jros2droid.Constants.TAG;
+import static id.jrosdroid.Constants.TAG;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -28,6 +28,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import id.jros2client.JRos2ClientFactory;
+import id.jros2droid.R;
 import id.jrosclient.JRosClient;
 import id.jrosclient.TopicSubmissionPublisher;
 import id.jrosclient.TopicSubscriber;
@@ -121,7 +122,7 @@ public class MainActivity extends Activity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        var loggingResource = "logging-jros2client.properties";
+        var loggingResource = "logging-jrosclient.properties";
         var inputStream = this.getClass().getClassLoader().getResourceAsStream(loggingResource);
         if (inputStream == null) {
             Log.i(TAG, "resource not found: " + loggingResource);
