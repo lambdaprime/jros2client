@@ -20,6 +20,14 @@ dependencies {
   testRuntimeOnly "org.junit.platform:junit-platform-commons:1.7.0"
 }
 
+sourceSets {
+  test {
+    java {
+      srcDirs += ["src/gen/java"]
+    }
+  }
+}
+
 test {
   useJUnitPlatform()
   minHeapSize = "128m" // initial heap size

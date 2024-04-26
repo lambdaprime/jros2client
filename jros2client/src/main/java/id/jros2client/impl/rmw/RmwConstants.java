@@ -58,7 +58,7 @@ public interface RmwConstants {
      * official document</a> does not mention pushMode. All this points that ROS2 by default has
      * pushMode enabled.
      *
-     * <p>To more align with ROS2 default behavior in <b>jros2client</a> the pushMode is enabled by
+     * <p>To more align with ROS2 default behavior in <b>jros2client</b> the pushMode is enabled by
      * default
      */
     boolean DEFAULT_PUSHMODE_ENABLED = true;

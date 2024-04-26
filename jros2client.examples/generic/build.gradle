@@ -18,11 +18,11 @@ repositories {
 }
 
 dependencies {
-  implementation project(':jros2client')
+  implementation project(":${zzName}")
 }
 
-sourceCompatibility = '17'
-targetCompatibility = '17'
+sourceCompatibility = zzJavaVersion
+targetCompatibility = zzJavaVersion
 
 sourceSets {
   main {
