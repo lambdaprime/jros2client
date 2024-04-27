@@ -1,7 +1,7 @@
 /*
  * Copyright 2024 jrosclient project
  * 
- * Website: https://github.com/lambdaprime/jros2client
+ * Website: https://github.com/lambdaprime/jrosclient
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,9 @@ public class RequestPermissionsActivity extends Activity {
      * @return true if all permissions are already present
      */
     private boolean checkAndRequestPermissions(String[] permissions) {
-        if (Build.VERSION.SDK_INT >= 23) return !requestPermissions(permissions);
+        if (Build.VERSION.SDK_INT >= 23) {
+            return !requestPermissions(permissions);
+        }
         return true;
     }
 
@@ -81,10 +83,13 @@ public class RequestPermissionsActivity extends Activity {
     private boolean requestPermissions(String[] permissions) {
         List<String> missing = new ArrayList<>();
         for (String permission : permissions) {
-            if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED)
+            if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
                 missing.add(permission);
+            }
         }
-        if (missing.isEmpty()) return false;
+        if (missing.isEmpty()) {
+            return false;
+        }
         Log.i(TAG, "Missing permissions " + missing);
         requestPermissions(missing.toArray(new String[0]), REQUEST_CODE);
         return true;

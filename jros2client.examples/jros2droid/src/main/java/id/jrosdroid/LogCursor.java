@@ -1,7 +1,7 @@
 /*
  * Copyright 2024 jrosclient project
  * 
- * Website: https://github.com/lambdaprime/jros2client
+ * Website: https://github.com/lambdaprime/jrosclient
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import android.database.AbstractCursor;
  */
 public class LogCursor extends AbstractCursor {
 
+    private int count;
+
     @Override
     public String[] getColumnNames() {
         return new String[] {"_id", "message"};
@@ -31,7 +33,7 @@ public class LogCursor extends AbstractCursor {
 
     @Override
     public int getCount() {
-        return LogViewHandler.logs.size();
+        return count;
     }
 
     @Override
@@ -70,5 +72,15 @@ public class LogCursor extends AbstractCursor {
     @Override
     public boolean isNull(int arg0) {
         return false;
+    }
+
+    @Override
+    public boolean requery() {
+        count = LogViewHandler.logs.size();
+        return super.requery();
+    }
+
+    public boolean isStale() {
+        return count != LogViewHandler.logs.size();
     }
 }

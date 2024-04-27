@@ -27,7 +27,7 @@ android {
     targetSdkVersion androidSdkVersion
     minSdkVersion androidSdkVersion
 
-    // read jros2client version
+    // read jrosclient version
     def propsFile = java.nio.file.Paths.get("../../gradle.properties")
     def libVersion = java.nio.file.Files
       .readAllLines(propsFile)
@@ -36,7 +36,7 @@ android {
       .map(l -> l.replaceAll("version = (.*)", '$1'))
       .peek(System.out::println)
       .findFirst()
-      .orElseThrow(() -> new RuntimeException("jros2client version is missing inside " + propsFile))
+      .orElseThrow(() -> new RuntimeException("jrosclient version is missing inside " + propsFile))
     println libVersion
     versionCode 1
     versionName "${libVersion}"
@@ -47,6 +47,10 @@ android {
     abortOnError false
   }
 
+  packagingOptions {
+    exclude("META-INF/DEPENDENCIES")
+  }
+  
   sourceSets {
     main {
       manifest.srcFile 'AndroidManifest.xml'
@@ -80,7 +84,7 @@ spotless {
     licenseHeader '''/*
  * Copyright $YEAR jrosclient project
  * 
- * Website: https://github.com/lambdaprime/jros2client
+ * Website: https://github.com/lambdaprime/jrosclient
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

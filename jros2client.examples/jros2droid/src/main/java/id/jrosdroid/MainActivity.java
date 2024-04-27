@@ -1,7 +1,7 @@
 /*
  * Copyright 2024 jrosclient project
  * 
- * Website: https://github.com/lambdaprime/jros2client
+ * Website: https://github.com/lambdaprime/jrosclient
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,15 @@ import static id.jrosdroid.Constants.TAG;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
+import id.jros2client.JRos2ClientConfiguration;
 import id.jros2client.JRos2ClientFactory;
 import id.jros2droid.R;
 import id.jrosclient.JRosClient;
@@ -38,6 +41,7 @@ import id.xfunction.lang.XThread;
 import id.xfunction.logging.XLogger;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -56,40 +60,48 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (findViewById(R.id.description) instanceof TextView view) {
+            view.setMovementMethod(LinkMovementMethod.getInstance());
+        }
         var topicNameView = (EditText) findViewById(R.id.topicName);
         setupLogging();
+        var config = new JRos2ClientConfiguration.Builder().build();
         ((Button) findViewById(R.id.subscribe))
                 .setOnClickListener(
                         view -> {
                             stop();
-                            client = new JRos2ClientFactory().createClient();
-                            client.subscribe(
-                                    new TopicSubscriber<>(
-                                            StringMessage.class,
-                                            topicNameView.getText().toString()) {
-                                        @Override
-                                        public void onNext(StringMessage item) {
-                                            Log.i(TAG, "received " + item);
-                                            LOGGER.info(item.toString());
-                                            // request next message
-                                            getSubscription().get().request(1);
-                                        }
+                            client = new JRos2ClientFactory().createClient(config);
+                            executor = Executors.newSingleThreadExecutor();
+                            executor.submit(
+                                    () -> {
+                                        client.subscribe(
+                                                new TopicSubscriber<>(
+                                                        StringMessage.class,
+                                                        topicNameView.getText().toString()) {
+                                                    @Override
+                                                    public void onNext(StringMessage item) {
+                                                        Log.i(TAG, "received " + item);
+                                                        LOGGER.info(item.toString());
+                                                        // request next message
+                                                        getSubscription().get().request(1);
+                                                    }
+                                                });
                                     });
                         });
         ((Button) findViewById(R.id.publish))
                 .setOnClickListener(
                         view -> {
                             stop();
-                            client = new JRos2ClientFactory().createClient();
+                            client = new JRos2ClientFactory().createClient(config);
                             var publisher =
                                     new TopicSubmissionPublisher<>(
                                             StringMessage.class,
                                             topicNameView.getText().toString());
-                            // register a new publisher for a new topic with ROS
-                            client.publish(publisher);
                             executor = Executors.newSingleThreadExecutor();
                             executor.submit(
                                     () -> {
+                                        // register a new publisher for a new topic with ROS
+                                        client.publish(publisher);
                                         while (!executor.isShutdown()) {
                                             var message =
                                                     new StringMessage()
@@ -111,7 +123,15 @@ public class MainActivity extends Activity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        client.close();
+        // avoid NetworkOnMainThreadException as close may perform network communication
+        var future = new CompletableFuture<Void>();
+        new Thread(
+                        () -> {
+                            client.close();
+                            future.complete(null);
+                        })
+                .start();
+        Unchecked.run(future::get);
     }
 
     private void setupLogging() {
@@ -131,25 +151,24 @@ public class MainActivity extends Activity {
         Unchecked.run(() -> LogManager.getLogManager().readConfiguration(inputStream));
         var logView = (ListView) findViewById(R.id.logView);
         var cursor = new LogCursor();
-        logView.setAdapter(
+        var adapter =
                 new SimpleCursorAdapter(
                         this,
                         R.layout.item,
                         cursor,
                         new String[] {"message"},
                         new int[] {R.id.message},
-                        CursorAdapter.FLAG_AUTO_REQUERY));
+                        CursorAdapter.FLAG_AUTO_REQUERY);
+        logView.setAdapter(adapter);
         new Thread(
                         () -> {
-                            int prev = cursor.getCount();
                             while (true) {
-                                if (cursor.getCount() != prev) {
+                                if (cursor.isStale()) {
                                     logView.post(
                                             () -> {
                                                 cursor.requery();
                                                 logView.setSelection(cursor.getCount());
                                             });
-                                    prev = cursor.getCount();
                                 }
                                 XThread.sleep(1000);
                             }

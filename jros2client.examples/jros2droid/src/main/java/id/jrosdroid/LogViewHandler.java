@@ -1,7 +1,7 @@
 /*
  * Copyright 2024 jrosclient project
  * 
- * Website: https://github.com/lambdaprime/jros2client
+ * Website: https://github.com/lambdaprime/jrosclient
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,15 +28,18 @@ import java.util.logging.StreamHandler;
  */
 public class LogViewHandler extends StreamHandler {
 
-    public static List<String> logs = new CopyOnWriteArrayList<String>();
+    public static List<String> logs = new CopyOnWriteArrayList<>();
 
     @Override
     public synchronized void publish(LogRecord record) {
         var levelValue = getLevel().intValue();
-        if (record == null) return;
-        if (record.getLevel().intValue() < levelValue) return;
+        if ((record == null) || (record.getLevel().intValue() < levelValue)) {
+            return;
+        }
         final Filter filter = getFilter();
-        if (filter != null && !filter.isLoggable(record)) return;
+        if (filter != null && !filter.isLoggable(record)) {
+            return;
+        }
         logs.add(getFormatter().format(record));
     }
 }
