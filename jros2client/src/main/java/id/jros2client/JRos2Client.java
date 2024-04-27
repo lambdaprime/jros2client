@@ -28,7 +28,7 @@ import java.util.concurrent.Flow.Subscriber;
 /**
  * Client to ROS2.
  *
- * @see {@link JRos2ClientFactory}
+ * @see JRos2ClientFactory
  * @author lambdaprime intid@protonmail.com
  */
 public interface JRos2Client extends JRosClient {

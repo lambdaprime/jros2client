@@ -1,3 +1,18 @@
+# Version 7
+
+- Syncup jros2droid with jros1droid
+- Renaming jros2droid package
+- Updating dependencies
+- Updating dependency libraries
+- Add JRos2ClientConfiguration into examples
+- Updating gradle files
+- Include jros2droid APK in release archive
+- Adding publish, subscribe functionality to jros2droid
+- Adding spotless to jros2droid
+- Add "fields" parameter to examples
+
+[jros2client-v7.0.zip](https://github.com/lambdaprime/jros2client/raw/main/jros2client/release/jros2client-v7.0.zip)
+
 # Version 6
 
 - Updating jros2droid to show live logs
