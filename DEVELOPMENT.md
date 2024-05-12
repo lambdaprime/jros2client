@@ -28,7 +28,7 @@ gradle eclipse
 - Install in Android
 - Run `gradle :jros2client:createRelease -PaddJRosDroid`
 - Open next SNAPSHOT version
-- Update CHANGELOG.md with new release (for changelog generation use `git log --format=%s`)
+- Update [CHANGELOG.md](jros2client/release/CHANGELOG.md) with new release (for changelog generation use `git log --format=%s`)
 - Commit changes
 - Push
 - Make sure that new release did not make any changes to existing examples and "jros2droid". If it did then update corresponding examples in the documentation.

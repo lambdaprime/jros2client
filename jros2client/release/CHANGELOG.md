@@ -1,3 +1,9 @@
+# Version 8
+
+- Updating to jros2messages v8 and rtpstalk v8
+
+[jros2client-v8.0.zip](https://github.com/lambdaprime/jros2client/raw/main/jros2client/release/jros2client-v8.0.zip)
+
 # Version 7
 
 - Syncup jros2droid with jros1droid
