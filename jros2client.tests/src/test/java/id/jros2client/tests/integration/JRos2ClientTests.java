@@ -22,6 +22,8 @@ import static java.util.stream.Collectors.toList;
 import id.jros2client.JRos2Client;
 import id.jros2client.JRos2ClientConfiguration;
 import id.jros2client.JRos2ClientFactory;
+import id.jros2client.qos.QosReliability;
+import id.jros2client.qos.SubscriberQos;
 import id.jros2messages.Ros2MessageSerializationUtils;
 import id.jros2messages.sensor_msgs.ImageMessage;
 import id.jrosclient.TopicSubmissionPublisher;
@@ -44,6 +46,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -56,13 +59,14 @@ import pinorobotics.rtpstalk.RtpsTalkConfiguration;
 public class JRos2ClientTests {
 
     private static final JRos2ClientFactory factory = new JRos2ClientFactory();
-    private static Ros2Commands ros2Commands;
     private static JRos2Client client;
 
-    static Stream<Ros2Commands> dataProvider() {
+    public record TestCase(RmwImplementation rmw) {}
+
+    static Stream<TestCase> dataProvider() {
         return Stream.of(
-                new Ros2Commands(RmwImplementation.FASTDDS),
-                new Ros2Commands(RmwImplementation.CYCLONEDDS));
+                new TestCase(RmwImplementation.FASTDDS),
+                new TestCase(RmwImplementation.CYCLONEDDS));
     }
 
     @BeforeAll
@@ -80,84 +84,86 @@ public class JRos2ClientTests {
         System.out.println("Closing client");
         client.close();
         System.out.println("Terminating ROS2 commands");
-        ros2Commands.close();
     }
 
     @ParameterizedTest
     @MethodSource("dataProvider")
-    public void test_subscribe_happy(Ros2Commands commands) throws Exception {
-        ros2Commands = commands;
-        var future = new CompletableFuture<List<Integer>>();
-        client.subscribe(
-                new TopicSubscriber<>(StringMessage.class, "chatter") {
-                    private List<Integer> buf = new ArrayList<>();
+    void test_subscribe_happy(TestCase testCase) throws Exception {
+        try (var ros2Commands = new Ros2Commands(testCase.rmw())) {
+            var future = new CompletableFuture<List<Integer>>();
+            client.subscribe(
+                    new TopicSubscriber<>(StringMessage.class, "chatter") {
+                        private List<Integer> buf = new ArrayList<>();
 
-                    @Override
-                    public void onNext(StringMessage item) {
-                        super.onNext(item);
-                        System.out.println(item.data);
-                        var n = Integer.parseInt(item.data.substring("Hello World: ".length()));
-                        buf.add(n);
-                        if (buf.size() == 5) {
-                            getSubscription().get().cancel();
-                            future.complete(reduceByFirst(buf));
-                            return;
-                        }
-                        getSubscription().get().request(1);
-                    }
-                });
-        ros2Commands.runTalker().forwardOutputAsync(true);
-        Assertions.assertEquals("[0, 1, 2, 3, 4]", future.get().toString());
-    }
-
-    @ParameterizedTest
-    @MethodSource("dataProvider")
-    public void test_publish_happy(Ros2Commands commands) throws Exception {
-        ros2Commands = commands;
-        var topicName = "/chatter";
-        var publisher = new TopicSubmissionPublisher<>(StringMessage.class, topicName);
-        client.publish(publisher);
-        var proc = ros2Commands.runListener();
-        ForkJoinPool.commonPool()
-                .execute(
-                        () -> {
-                            int c = 0;
-                            while (true) {
-                                publisher.submit(new StringMessage("" + c++));
-                                XThread.sleep(100);
+                        @Override
+                        public void onNext(StringMessage item) {
+                            super.onNext(item);
+                            System.out.println(item.data);
+                            var n = Integer.parseInt(item.data.substring("Hello World: ".length()));
+                            buf.add(n);
+                            if (buf.size() == 5) {
+                                getSubscription().get().cancel();
+                                future.complete(reduceByFirst(buf));
+                                return;
                             }
-                        });
-        var actual =
-                proc.stderrAsStream()
-                        .peek(System.out::println)
-                        .limit(10)
-                        .map(
-                                line ->
-                                        Integer.parseInt(
-                                                line.replaceAll(".*I heard: \\[(\\d*)\\]", "$1")))
-                        .collect(toList());
-        for (int i = 1; i < actual.size(); i++) {
-            Assertions.assertTrue(actual.get(i - 1) < actual.get(i));
+                            getSubscription().get().request(1);
+                        }
+                    });
+            ros2Commands.runTalker().forwardOutputAsync(true);
+            Assertions.assertEquals("[0, 1, 2, 3, 4]", future.get().toString());
         }
-        new AssertRunCommand(
-                        "ros2",
-                        "topic",
-                        "info",
-                        "--spin-time",
-                        ""
-                                + client.getConfiguration()
-                                                .rtpsTalkConfiguration()
-                                                .spdpDiscoveredParticipantDataPublishPeriod()
-                                                .toSeconds()
-                                        * 2,
-                        "-v",
-                        "--no-daemon",
-                        topicName)
-                .withOutputConsumer(System.out::println)
-                .assertOutputFromResource("test_publish_happy")
-                .withWildcardMatching()
-                .assertReturnCode(0)
-                .run();
+    }
+
+    @ParameterizedTest
+    @MethodSource("dataProvider")
+    public void test_publish_happy(TestCase testCase) throws Exception {
+        try (var ros2Commands = new Ros2Commands(testCase.rmw())) {
+            var topicName = "/chatter";
+            var publisher = new TopicSubmissionPublisher<>(StringMessage.class, topicName);
+            client.publish(publisher);
+            var proc = ros2Commands.runListener();
+            ForkJoinPool.commonPool()
+                    .execute(
+                            () -> {
+                                int c = 0;
+                                while (true) {
+                                    publisher.submit(new StringMessage("" + c++));
+                                    XThread.sleep(100);
+                                }
+                            });
+            var actual =
+                    proc.stderrAsStream()
+                            .peek(System.out::println)
+                            .limit(10)
+                            .map(
+                                    line ->
+                                            Integer.parseInt(
+                                                    line.replaceAll(
+                                                            ".*I heard: \\[(\\d*)\\]", "$1")))
+                            .collect(toList());
+            for (int i = 1; i < actual.size(); i++) {
+                Assertions.assertTrue(actual.get(i - 1) < actual.get(i));
+            }
+            new AssertRunCommand(
+                            "ros2",
+                            "topic",
+                            "info",
+                            "--spin-time",
+                            ""
+                                    + client.getConfiguration()
+                                                    .rtpsTalkConfiguration()
+                                                    .spdpDiscoveredParticipantDataPublishPeriod()
+                                                    .toSeconds()
+                                            * 2,
+                            "-v",
+                            "--no-daemon",
+                            topicName)
+                    .withOutputConsumer(System.out::println)
+                    .assertOutputFromResource("test_publish_happy")
+                    .withWildcardMatching()
+                    .assertReturnCode(0)
+                    .run();
+        }
     }
 
     /**
@@ -174,16 +180,15 @@ public class JRos2ClientTests {
      */
     @ParameterizedTest
     @MethodSource("dataProvider")
-    public void test_publish_message_over_1Mb(Ros2Commands commands) throws Exception {
-        ros2Commands = commands;
+    public void test_publish_message_over_1Mb(TestCase testCase) throws Exception {
         var message =
                 new Ros2MessageSerializationUtils()
                         .read(
                                 Files.readAllBytes(
                                         Paths.get("samples/ImageMessage/seattle_ImageMessage.bin")),
                                 ImageMessage.class);
-        var proc = ros2Commands.runRqt();
-        try (var publisherClient =
+        try (var ros2Commands = new Ros2Commands(testCase.rmw());
+                var publisherClient =
                         factory.createClient(
                                 new JRos2ClientConfiguration.Builder()
                                         .rtpsTalkConfiguration(
@@ -192,6 +197,7 @@ public class JRos2ClientTests {
                                                         .build())
                                         .build());
                 var subscriberClient = factory.createClient(); ) {
+            var proc = ros2Commands.runRqt();
             String topic = "testTopic1";
             var publisher = new TopicSubmissionPublisher<>(ImageMessage.class, topic);
             publisherClient.publish(publisher);
@@ -208,6 +214,39 @@ public class JRos2ClientTests {
             var actual = collector.getFuture().get();
             Assertions.assertEquals(8, actual.size());
             Assertions.assertEquals(message, actual.get(0));
+        }
+    }
+
+    @Test
+    public void test_subscribe_best_effort() throws Exception {
+        try (var ros2Commands = new Ros2Commands(RmwImplementation.FASTDDS)) {
+            var future = new CompletableFuture<Void>();
+            client.subscribe(
+                    new SubscriberQos(QosReliability.BEST_EFFORT),
+                    new TopicSubscriber<>(StringMessage.class, "helloRos") {
+                        private int count;
+
+                        @Override
+                        public void onNext(StringMessage item) {
+                            super.onNext(item);
+                            System.out.println(item.data);
+                            Assertions.assertEquals(
+                                    """
+                                    { "data": "hello there" }""",
+                                    item.toString());
+                            if (++count == 5) {
+                                getSubscription().get().cancel();
+                                future.complete(null);
+                                return;
+                            }
+                            getSubscription().get().request(1);
+                        }
+                    });
+            ros2Commands
+                    .runStaticPublisher("helloRos", QosReliability.BEST_EFFORT)
+                    .forwardOutputAsync(true);
+            // wait until 5 messages received
+            future.get();
         }
     }
 

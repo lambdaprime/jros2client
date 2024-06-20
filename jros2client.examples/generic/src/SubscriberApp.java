@@ -32,7 +32,8 @@ public class SubscriberApp {
         // use configBuilder to override default parameters (network interface, RTPS settings etc)
         var client = new JRos2ClientFactory().createClient(configBuilder.build());
         var topicName = "/helloRos";
-        // register a new subscriber
+        // register a new subscriber with default QOS policies
+        // users can redefine QOS policies using overloaded version of subscribe() method
         client.subscribe(
                 new TopicSubscriber<>(StringMessage.class, topicName) {
                     @Override

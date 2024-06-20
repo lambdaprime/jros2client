@@ -20,11 +20,14 @@ package id.jros2client.impl;
 import id.jros2client.JRos2Client;
 import id.jros2client.JRos2ClientConfiguration;
 import id.jros2client.impl.rmw.DdsNameMapper;
+import id.jros2client.impl.rmw.DdsQosMapper;
 import id.jros2client.impl.rmw.RmwConstants;
+import id.jros2client.qos.SubscriberQos;
 import id.jrosclient.JRosClientMetrics;
 import id.jrosclient.RosVersion;
 import id.jrosclient.TopicPublisher;
 import id.jrosclient.TopicSubmissionPublisher;
+import id.jrosclient.TopicSubscriber;
 import id.jrosclient.exceptions.JRosClientException;
 import id.jrosmessages.Message;
 import id.xfunction.concurrent.flow.TransformPublisher;
@@ -78,12 +81,14 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
     private MessageUtils messageUtils;
     private JRos2ClientConfiguration config;
     private boolean isClosed;
+    private DdsQosMapper qosMapper;
 
     public JRos2ClientImpl(JRos2ClientConfiguration config, ObjectsFactory factory) {
         this.config = config;
         this.messageUtils = factory.createMessageUtils();
         rosNameMapper = factory.createNameMapper();
         rtpsTalkClient = factory.createRtpsTalkClient(config.rtpsTalkConfiguration());
+        qosMapper = factory.createQosMapper();
         tracingToken = new TracingToken("" + hashCode());
         logger = XLogger.getLogger(getClass(), tracingToken);
         CLIENT_OBJECTS_METER.record(1, JRos2ClientConstants.METRIC_ATTRS);
@@ -93,14 +98,41 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
     public <M extends Message> void subscribe(
             String topic, Class<M> messageClass, Subscriber<M> subscriber)
             throws JRosClientException {
+        subscribe(topic, messageClass, SubscriberQos.DEFAULT_SUBSCRIBER_QOS, subscriber);
+    }
+
+    @Override
+    public <M extends Message> void subscribe(TopicSubscriber<M> subscriber)
+            throws JRosClientException {
+        subscribe(
+                subscriber.getTopic(),
+                subscriber.getMessageClass(),
+                SubscriberQos.DEFAULT_SUBSCRIBER_QOS,
+                subscriber);
+    }
+
+    @Override
+    public <M extends Message> void subscribe(
+            SubscriberQos subscriberQos, TopicSubscriber<M> subscriber) throws JRosClientException {
+        subscribe(subscriber.getTopic(), subscriber.getMessageClass(), subscriberQos, subscriber);
+    }
+
+    @Override
+    public <M extends Message> void subscribe(
+            String topic,
+            Class<M> messageClass,
+            SubscriberQos subscriberQos,
+            Subscriber<M> subscriber)
+            throws JRosClientException {
         startLazy();
-        logger.info("Subscribing to {0} type {1}", topic, messageClass.getName());
+        logger.info(
+                "Subscribing to {0} with type {1}, qos {2}",
+                topic, messageClass.getName(), subscriberQos);
         var messageName = rosNameMapper.asFullyQualifiedDdsTypeName(messageClass);
         topic = rosNameMapper.asFullyQualifiedDdsTopicName(topic, messageClass);
         var transformer =
                 new TransformSubscriber<>(subscriber, messageUtils.deserializer(messageClass));
-        rtpsTalkClient.subscribe(
-                topic, messageName, RmwConstants.DEFAULT_SUBSCRIBER_QOS, transformer);
+        rtpsTalkClient.subscribe(topic, messageName, qosMapper.asDds(subscriberQos), transformer);
         SUBSCRIBE_CALLS_METER.record(1, JRos2ClientConstants.METRIC_ATTRS);
     }
 

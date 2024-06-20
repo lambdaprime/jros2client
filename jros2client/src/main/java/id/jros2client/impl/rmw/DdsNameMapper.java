@@ -22,7 +22,7 @@ import id.jrosmessages.Message;
 import id.jrosmessages.MessageMetadataAccessor;
 
 /**
- * Mapper for ROS2 topic names.
+ * Mapper of ROS2 names (topics, types) to DDS names.
  *
  * <p>ROS naming differs between ROS versions on top of that it differs between the ROS topics,
  * services, actions, etc.

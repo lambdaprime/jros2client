@@ -21,7 +21,6 @@ import pinorobotics.rtpstalk.WriterSettings;
 import pinorobotics.rtpstalk.qos.DurabilityType;
 import pinorobotics.rtpstalk.qos.PublisherQosPolicy;
 import pinorobotics.rtpstalk.qos.ReliabilityType;
-import pinorobotics.rtpstalk.qos.SubscriberQosPolicy;
 
 /**
  * @author lambdaprime intid@protonmail.com
@@ -37,17 +36,6 @@ public interface RmwConstants {
      */
     PublisherQosPolicy DEFAULT_PUBLISHER_QOS =
             new PublisherQosPolicy(
-                    ReliabilityType.RELIABLE, DurabilityType.VOLATILE_DURABILITY_QOS);
-
-    /**
-     * From http://design.ros2.org/articles/qos.html:
-     *
-     * <p>In order to make the transition from ROS 1 to ROS 2, exercising a similar network behavior
-     * is desirable. By default, publishers and subscriptions are reliable in ROS 2, have volatile
-     * durability, and keep last history.
-     */
-    SubscriberQosPolicy DEFAULT_SUBSCRIBER_QOS =
-            new SubscriberQosPolicy(
                     ReliabilityType.RELIABLE, DurabilityType.VOLATILE_DURABILITY_QOS);
 
     /**

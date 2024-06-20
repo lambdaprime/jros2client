@@ -17,6 +17,7 @@
  */
 package id.jros2client.tests.integration;
 
+import id.jros2client.qos.QosReliability;
 import id.xfunction.lang.XExec;
 import id.xfunction.lang.XProcess;
 import java.util.ArrayList;
@@ -41,9 +42,32 @@ public class Ros2Commands implements AutoCloseable {
                 };
     }
 
+    /** Publishes static message */
+    public XProcess runStaticPublisher(String topic, QosReliability reliability) {
+        var proc =
+                new XExec(
+                                "ros2",
+                                "topic",
+                                "pub",
+                                "--qos-reliability",
+                                reliability == QosReliability.RELIABLE ? "reliable" : "best_effort",
+                                "-r",
+                                "3",
+                                topic,
+                                "std_msgs/String",
+                                "data: \"hello there\"")
+                        .withEnvironmentVariables(env)
+                        .start();
+        procs.add(proc);
+        return proc;
+    }
+
+    /** Opposite to "ros2 topic pub" this publishes unique messages. */
     public XProcess runTalker() {
         var proc =
-                new XExec("ros2 run demo_nodes_cpp talker").withEnvironmentVariables(env).start();
+                new XExec("ros2", "run", "demo_nodes_cpp", "talker")
+                        .withEnvironmentVariables(env)
+                        .start();
         procs.add(proc);
         return proc;
     }

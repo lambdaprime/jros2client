@@ -18,6 +18,12 @@ gradle eclipse
 
 - Import them into Eclipse
 
+# Prerelease steps
+
+- Publish SNAPSHOT version
+- Update jrosdroid to jrosclient SNAPSHOT version and build it
+- Install in Android
+
 # Release steps
 
 - Update [Android dependencies](android/gradle.properties) and run `gradle clean build -b android/build.gradle`

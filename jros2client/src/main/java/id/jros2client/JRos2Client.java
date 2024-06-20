@@ -17,9 +17,11 @@
  */
 package id.jros2client;
 
+import id.jros2client.qos.SubscriberQos;
 import id.jrosclient.JRosClient;
 import id.jrosclient.RosVersion;
 import id.jrosclient.TopicPublisher;
+import id.jrosclient.TopicSubscriber;
 import id.jrosclient.exceptions.JRosClientException;
 import id.jrosmessages.Message;
 import java.util.EnumSet;
@@ -39,10 +41,34 @@ public interface JRos2Client extends JRosClient {
     @Override
     EnumSet<RosVersion> getSupportedRosVersion();
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * <p>By default uses {@link SubscriberQos#DEFAULT_SUBSCRIBER_QOS}
+     */
     @Override
     <M extends Message> void subscribe(
             String topic, Class<M> messageClass, Subscriber<M> subscriber)
+            throws JRosClientException;
+
+    /** Subscribe with specific QOS parameters */
+    <M extends Message> void subscribe(
+            String topic,
+            Class<M> messageClass,
+            SubscriberQos subscriberQos,
+            Subscriber<M> subscriber)
+            throws JRosClientException;
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>By default uses {@link SubscriberQos#DEFAULT_SUBSCRIBER_QOS}
+     */
+    @Override
+    <M extends Message> void subscribe(TopicSubscriber<M> subscriber) throws JRosClientException;
+
+    /** Subscribe with specific QOS parameters */
+    <M extends Message> void subscribe(SubscriberQos subscriberQos, TopicSubscriber<M> subscriber)
             throws JRosClientException;
 
     /** {@inheritDoc} */
