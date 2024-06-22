@@ -134,6 +134,7 @@ public class JRos2ClientTests {
             var actual =
                     proc.stderrAsStream()
                             .peek(System.out::println)
+                            .filter(l -> !l.startsWith("[WARN]"))
                             .limit(10)
                             .map(
                                     line ->
