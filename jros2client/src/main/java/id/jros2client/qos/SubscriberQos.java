@@ -20,11 +20,7 @@ package id.jros2client.qos;
 import id.xfunction.XJsonStringBuilder;
 
 /**
- * From http://design.ros2.org/articles/qos.html:
- *
- * <p>In order to make the transition from ROS 1 to ROS 2, exercising a similar network behavior is
- * desirable. By default, publishers and subscriptions are reliable in ROS 2, have volatile
- * durability, and keep last history.
+ * Quality of Service policy definition for a Subscriber
  *
  * @author lambdaprime intid@protonmail.com
  */
@@ -32,6 +28,13 @@ public record SubscriberQos(QosReliability qosReliability, QosDurability qosDura
 
     public static final QosReliability DEFAULT_SUBSCRIBER_QOS_RELIABILITY = QosReliability.RELIABLE;
     public static final QosDurability DEFAULT_SUBSCRIBER_QOS_DURABILITY = QosDurability.VOLATILE;
+
+    /**
+     * In order to make the transition from ROS 1 to ROS 2, exercising a similar network behavior is
+     * desirable. By default, publishers and subscriptions are reliable in ROS 2, have volatile
+     * durability, and keep last history. (<a href="http://design.ros2.org/articles/qos.html">ROS 2
+     * Quality of Service policies</a>)
+     */
     public static final SubscriberQos DEFAULT_SUBSCRIBER_QOS =
             new SubscriberQos(
                     DEFAULT_SUBSCRIBER_QOS_RELIABILITY, DEFAULT_SUBSCRIBER_QOS_DURABILITY);

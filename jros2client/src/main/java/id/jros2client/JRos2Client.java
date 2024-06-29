@@ -51,7 +51,7 @@ public interface JRos2Client extends JRosClient {
             String topic, Class<M> messageClass, Subscriber<M> subscriber)
             throws JRosClientException;
 
-    /** Subscribe with specific QOS parameters */
+    /** Subscribe to ROS topic with specific QOS parameters */
     <M extends Message> void subscribe(
             String topic,
             Class<M> messageClass,
@@ -67,7 +67,7 @@ public interface JRos2Client extends JRosClient {
     @Override
     <M extends Message> void subscribe(TopicSubscriber<M> subscriber) throws JRosClientException;
 
-    /** Subscribe with specific QOS parameters */
+    /** Subscribe to ROS topic with specific QOS parameters */
     <M extends Message> void subscribe(SubscriberQos subscriberQos, TopicSubscriber<M> subscriber)
             throws JRosClientException;
 

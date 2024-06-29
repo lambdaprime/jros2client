@@ -28,7 +28,7 @@ gradle eclipse
 
 - Update [Android dependencies](android/gradle.properties) and run `gradle clean build -b android/build.gradle`
 - Close version in gradle.properties
-- Run `gradle clean build javadoc`
+- Run `gradle clean build javadoc` (on Humble then Jazzy)
 - Publish
 - Update [jros2droid](jros2client.examples/jros2droid/build.gradle) to new jros2client version and build it
 - Install in Android

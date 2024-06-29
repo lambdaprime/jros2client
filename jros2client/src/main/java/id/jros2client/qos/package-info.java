@@ -1,5 +1,5 @@
 /**
- * Supported QOS policies
+ * Supported Quality of Service policies
  *
  * @see <a href="http://design.ros2.org/articles/qos.html">ROS 2 Quality of Service policies</a>
  * @see <a

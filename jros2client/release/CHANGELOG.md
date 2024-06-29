@@ -1,3 +1,10 @@
+# Version 9
+
+- Support for Jazzy
+- Issue #12 Allow users to specify subscriber QOS parameters
+
+[jros2client-v9.0.zip](https://github.com/lambdaprime/jros2client/raw/main/jros2client/release/jros2client-v9.0.zip)
+
 # Version 8
 
 - Updating to jros2messages v8 and rtpstalk v8
