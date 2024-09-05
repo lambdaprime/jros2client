@@ -41,6 +41,7 @@ public class JRos2PubSubClientTests extends JRosPubSubClientTests {
         Supplier<JRosClient> clientFactory = factory::createClient;
         var defaultConfig = new JRos2ClientConfiguration.Builder().build();
         init(
+                clientFactory,
                 new TestCase(
                         "test_jros2client",
                         clientFactory,
