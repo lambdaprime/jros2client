@@ -1,4 +1,9 @@
 include "${zzName}"
+
 include "${zzName}.examples-generic"
 project(":${zzName}.examples-generic").projectDir = new File("${zzName}.examples/generic")
+
+include "${zzName}.diagnostics_otel"
+project(":${zzName}.diagnostics_otel").projectDir = new File("${zzName}.examples/diagnostics_otel")
+
 include "${zzName}.tests"

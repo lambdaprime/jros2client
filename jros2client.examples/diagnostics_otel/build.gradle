@@ -19,18 +19,12 @@ repositories {
 
 dependencies {
   implementation project(":jros2client")
+  implementation "io.opentelemetry:opentelemetry-api:1.43.0"
+  implementation "io.github.lambdaprime:id.opentelemetry-exporters-pack:4.0-SNAPSHOT"
 }
 
 sourceCompatibility = 17
 targetCompatibility = 17
-
-sourceSets {
-  main {
-    java {
-      srcDirs += ["src"]
-    }
-  }
-}
 
 // run spotless and format code before the build
 classes.dependsOn spotlessApply
