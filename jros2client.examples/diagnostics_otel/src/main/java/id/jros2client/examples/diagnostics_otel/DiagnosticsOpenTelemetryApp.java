@@ -34,6 +34,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import pinorobotics.rtpstalk.RtpsTalkConfiguration;
 
 /**
@@ -45,6 +47,8 @@ public class DiagnosticsOpenTelemetryApp {
 
     private static Meter meter;
     private static final Map<String, DoubleGauge> gauges = new HashMap<>();
+    private static Predicate<String> isMegaBytes = Pattern.compile("\\d+M").asPredicate();
+    private static Predicate<String> isGigaBytes = Pattern.compile("\\d+G").asPredicate();
 
     /** List of Jetson stats we will be sending to OpenTelemetry */
     private static final List<String> isaac_ros_jetson_stats =
@@ -84,10 +88,10 @@ public class DiagnosticsOpenTelemetryApp {
      * @throws NumberFormatException if conversion fails
      */
     private static double parseMeasurement(String val) {
-        if (val.endsWith("M")) {
+        if (isMegaBytes.test(val)) {
             // convert MB to bytes
             return Double.parseDouble(val.replace("M", "")) * 1_000_000;
-        } else if (val.endsWith("G")) {
+        } else if (isGigaBytes.test(val)) {
             // convert GB to bytes
             return Double.parseDouble(val.replace("G", "")) * 1_000_000_000;
         } else {
