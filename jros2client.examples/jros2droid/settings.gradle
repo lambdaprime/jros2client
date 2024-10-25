@@ -13,5 +13,8 @@ dependencyResolutionManagement {
     google()
     mavenCentral()
     mavenLocal()
+    maven {
+      url "https://s01.oss.sonatype.org/content/groups/staging"
+    }
   }
 }

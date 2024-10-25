@@ -36,11 +36,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import pinorobotics.rtpstalk.RtpsTalkConfiguration;
 
 /**
  * Demonstrates how to use diagnostic_msgs with jrosclient.
  *
+ * @see <a href="http://portal2.atwebpages.com/jrosclient/diagnostics_otel">ROS diagnostics from
+ *     Jetson with jrosclient and isaac_ros_jetson_stats</a>
  * @author lambdaprime intid@protonmail.com
  */
 public class DiagnosticsOpenTelemetryApp {
@@ -101,14 +102,15 @@ public class DiagnosticsOpenTelemetryApp {
 
     /** Setup OpenTelemetry to send metrics to Elasticsearch */
     private static void setupMetrics() {
+        var elasticUrl =
+                URI.create(
+                        Optional.ofNullable(System.getenv("ELASTIC_URL"))
+                                        .orElse("https://127.0.0.1:9200")
+                                + "/diagnostics_otel");
         var metricReader =
                 PeriodicMetricReader.builder(
                                 new ElasticsearchMetricExporter(
-                                        URI.create(
-                                                "https://elastic:99L8efwboWanFxBq95I1@172.19.0.2:9200/diagnostics_otel"),
-                                        Optional.empty(),
-                                        Duration.ofSeconds(5),
-                                        true))
+                                        elasticUrl, Optional.empty(), Duration.ofSeconds(5), true))
                         .setInterval(Duration.ofSeconds(3))
                         .build();
         var sdkMeterProvider =
@@ -125,15 +127,7 @@ public class DiagnosticsOpenTelemetryApp {
 
         var configBuilder = new JRos2ClientConfiguration.Builder();
         // use configBuilder to override default parameters (network interface, RTPS settings etc)
-        var client =
-                new JRos2ClientFactory()
-                        .createClient(
-                                configBuilder
-                                        .rtpsTalkConfiguration(
-                                                new RtpsTalkConfiguration.Builder()
-                                                        .networkInterface("enp112s0")
-                                                        .build())
-                                        .build());
+        var client = new JRos2ClientFactory().createClient(configBuilder.build());
         var topicName = "/diagnostics_agg";
 
         // register a new subscriber with default QOS policies

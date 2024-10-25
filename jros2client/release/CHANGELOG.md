@@ -1,3 +1,11 @@
+# Version 10
+
+- Fixing issue with RPM units parsing
+- Adding diagnostics_otel
+- Issue pinorobotics/jros2services#1 Fixing processing of empty messages
+
+[jros2client-v10.0.zip](https://github.com/lambdaprime/jros2client/raw/main/jros2client/release/jros2client-v10.0.zip)
+
 # Version 9
 
 - Support for Jazzy

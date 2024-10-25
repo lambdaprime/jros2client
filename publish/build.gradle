@@ -22,7 +22,8 @@ gradle publish \
 Once it is done we can promote it to release repo:
 
 cd publish
-gradle closeAndReleaseRepository -PnexusUsername=$nexusA -PnexusPassword=$nexusB
+gradle closeRepository -PnexusUsername=$nexusA -PnexusPassword=$nexusB
+gradle releaseRepository -PnexusUsername=$nexusA -PnexusPassword=$nexusB
 
 **************************************************/
 
