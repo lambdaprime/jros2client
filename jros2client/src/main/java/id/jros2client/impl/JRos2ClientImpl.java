@@ -34,9 +34,9 @@ import id.xfunction.concurrent.flow.TransformPublisher;
 import id.xfunction.concurrent.flow.TransformSubscriber;
 import id.xfunction.logging.TracingToken;
 import id.xfunction.logging.XLogger;
-import id.xfunction.util.LazyService;
+import id.xfunction.util.IdempotentService;
 import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.metrics.LongHistogram;
+import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
 import java.util.EnumSet;
 import java.util.concurrent.Flow.Subscriber;
@@ -49,29 +49,25 @@ import pinorobotics.rtpstalk.RtpsTalkClient;
  *
  * @author lambdaprime intid@protonmail.com
  */
-public class JRos2ClientImpl extends LazyService implements JRos2Client {
+public class JRos2ClientImpl extends IdempotentService implements JRos2Client {
 
     private final Meter METER =
             GlobalOpenTelemetry.getMeter(TopicSubmissionPublisher.class.getSimpleName());
-    private final LongHistogram CLIENT_OBJECTS_METER =
-            METER.histogramBuilder(JRosClientMetrics.CLIENT_OBJECTS_METRIC)
-                    .setDescription(JRosClientMetrics.CLIENT_OBJECTS_METRIC_DESCRIPTION)
-                    .ofLongs()
+    private final LongCounter CLIENT_OBJECTS_COUNT_METER =
+            METER.counterBuilder(JRosClientMetrics.CLIENT_OBJECTS_COUNT_METRIC)
+                    .setDescription(JRosClientMetrics.CLIENT_OBJECTS_COUNT_METRIC_DESCRIPTION)
                     .build();
-    private final LongHistogram PUBLISH_CALLS_METER =
-            METER.histogramBuilder(JRosClientMetrics.PUBLISH_CALLS_METRIC)
-                    .setDescription(JRosClientMetrics.PUBLISH_CALLS_METRIC_DESCRIPTION)
-                    .ofLongs()
+    private final LongCounter PUBLISH_CALLS_COUNT_METER =
+            METER.counterBuilder(JRosClientMetrics.PUBLISH_CALLS_COUNT_METRIC)
+                    .setDescription(JRosClientMetrics.PUBLISH_CALLS_COUNT_METRIC_DESCRIPTION)
                     .build();
-    private final LongHistogram SUBSCRIBE_CALLS_METER =
-            METER.histogramBuilder(JRosClientMetrics.SUBSCRIBE_CALLS_METRIC)
-                    .setDescription(JRosClientMetrics.SUBSCRIBE_CALLS_METRIC_DESCRIPTION)
-                    .ofLongs()
+    private final LongCounter SUBSCRIBE_CALLS_COUNT_METER =
+            METER.counterBuilder(JRosClientMetrics.SUBSCRIBE_CALLS_COUNT_METRIC)
+                    .setDescription(JRosClientMetrics.SUBSCRIBE_CALLS_COUNT_METRIC_DESCRIPTION)
                     .build();
-    private final LongHistogram CLIENT_CLOSE_CALLS_METER =
-            METER.histogramBuilder(JRosClientMetrics.CLIENT_CLOSE_CALLS_METRIC)
-                    .setDescription(JRosClientMetrics.CLIENT_CLOSE_CALLS_METRIC_DESCRIPTION)
-                    .ofLongs()
+    private final LongCounter CLIENT_CLOSE_CALLS_COUNT_METER =
+            METER.counterBuilder(JRosClientMetrics.CLIENT_CLOSE_CALLS_COUNT_METRIC)
+                    .setDescription(JRosClientMetrics.CLIENT_CLOSE_CALLS_COUNT_METRIC_DESCRIPTION)
                     .build();
 
     private DdsNameMapper rosNameMapper;
@@ -91,7 +87,7 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
         qosMapper = factory.createQosMapper();
         tracingToken = new TracingToken("" + hashCode());
         logger = XLogger.getLogger(getClass(), tracingToken);
-        CLIENT_OBJECTS_METER.record(1, JRos2ClientConstants.METRIC_ATTRS);
+        CLIENT_OBJECTS_COUNT_METER.add(1, JRos2ClientConstants.METRIC_ATTRS);
     }
 
     @Override
@@ -124,7 +120,7 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
             SubscriberQos subscriberQos,
             Subscriber<M> subscriber)
             throws JRosClientException {
-        startLazy();
+        start();
         logger.info(
                 "Subscribing to {0} with type {1}, qos {2}",
                 topic, messageClass.getName(), subscriberQos);
@@ -133,13 +129,13 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
         var transformer =
                 new TransformSubscriber<>(subscriber, messageUtils.deserializer(messageClass));
         rtpsTalkClient.subscribe(topic, messageName, qosMapper.asDds(subscriberQos), transformer);
-        SUBSCRIBE_CALLS_METER.record(1, JRos2ClientConstants.METRIC_ATTRS);
+        SUBSCRIBE_CALLS_COUNT_METER.add(1, JRos2ClientConstants.METRIC_ATTRS);
     }
 
     @Override
     public <M extends Message> void publish(TopicPublisher<M> publisher)
             throws JRosClientException {
-        startLazy();
+        start();
         logger.info(
                 "Publishing to {0} type {1}",
                 publisher.getTopic(), publisher.getMessageClass().getName());
@@ -153,7 +149,7 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
                 RmwConstants.DEFAULT_PUBLISHER_QOS,
                 RmwConstants.DEFAULT_WRITER_SETTINGS,
                 transformer);
-        PUBLISH_CALLS_METER.record(1, JRos2ClientConstants.METRIC_ATTRS);
+        PUBLISH_CALLS_COUNT_METER.add(1, JRos2ClientConstants.METRIC_ATTRS);
     }
 
     @Override
@@ -194,7 +190,7 @@ public class JRos2ClientImpl extends LazyService implements JRos2Client {
         logger.fine("Close");
         isClosed = true;
         rtpsTalkClient.close();
-        CLIENT_CLOSE_CALLS_METER.record(1, JRos2ClientConstants.METRIC_ATTRS);
+        CLIENT_CLOSE_CALLS_COUNT_METER.add(1, JRos2ClientConstants.METRIC_ATTRS);
     }
 
     @Override
