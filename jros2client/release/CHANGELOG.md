@@ -1,3 +1,9 @@
+# Version 11
+
+- Changing type of metrics
+
+[jros2client-v11.0.zip](https://github.com/lambdaprime/jros2client/raw/main/jros2client/release/jros2client-v11.0.zip)
+
 # Version 10
 
 - Fixing issue with RPM units parsing

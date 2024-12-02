@@ -211,6 +211,7 @@ public class JRos2ClientTests {
                                     publisher.submit(message);
                                 }
                             });
+            proc.forwardStdoutAsync(false);
             proc.stderrThrow();
             var actual = collector.getFuture().get();
             Assertions.assertEquals(8, actual.size());
