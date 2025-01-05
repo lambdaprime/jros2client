@@ -38,9 +38,16 @@ import id.jrosmessages.MessageDescriptor;
  */
 public class DdsNameMapper {
 
-    private static final String ACTION_GOAL = "ActionGoal";
-    private static final String ACTION_RESULT = "ActionResult";
-    private static final String ACTION_GET_RESULT = "ActionGetResult";
+    private static final String ACTION_SEND_GOAL_REQUEST = "ActionGoal";
+    private static final String ACTION_SEND_GOAL_RESPONSE = "ActionGoalResult";
+    private static final String ACTION_GET_RESULT_REQUEST = "ActionGetResult";
+    private static final String ACTION_GET_RESULT_RESPONSE = "ActionResult";
+    private static final String ACTION_FEEDBACK = "ActionGoalFeedback";
+    private static final String ACTION_MSGS_CANCEL_GOAL_REQUEST =
+            "action_msgs/CancelGoalServiceRequest";
+    private static final String ACTION_MSGS_CANCEL_GOAL_RESPONSE =
+            "action_msgs/CancelGoalServiceResponse";
+    private static final String ACTION_MSGS_STATUS = "action_msgs/GoalStatusArray";
     private static final String SERVICE_REQUEST = "ServiceRequest";
     private static final String SERICE_RESPONSE = "ServiceResponse";
 
@@ -50,20 +57,34 @@ public class DdsNameMapper {
         var rosAbsoluteTopicName = topicName.toGlobalName();
         var interfaceType = messageDescriptor.readInterfaceType();
         var rosName = messageDescriptor.readName();
+        var fullname = rosName.toString();
         var lastName = rosName.lastName();
         switch (interfaceType) {
             case MESSAGE:
                 return "rt" + rosAbsoluteTopicName;
             case ACTION:
                 {
-                    if (lastName.endsWith(ACTION_GOAL))
-                        return "rq" + rosAbsoluteTopicName + "/_action/send_goalRequest";
-                    if (lastName.endsWith(ACTION_GET_RESULT))
-                        return "rq" + rosAbsoluteTopicName + "/_action/get_resultRequest";
-                    if (lastName.endsWith(ACTION_RESULT))
-                        return "rr" + rosAbsoluteTopicName + "/_action/get_resultReply";
-                    throw new IllegalArgumentException(
-                            "Not a valid message name " + lastName + " for an Action");
+                    return switch (fullname) {
+                        case ACTION_MSGS_CANCEL_GOAL_REQUEST ->
+                                "rq" + rosAbsoluteTopicName + "/_action/cancel_goalRequest";
+                        case ACTION_MSGS_CANCEL_GOAL_RESPONSE ->
+                                "rr" + rosAbsoluteTopicName + "/_action/cancel_goalReply";
+                        case ACTION_MSGS_STATUS -> "rt" + rosAbsoluteTopicName + "/_action/status";
+                        default -> {
+                            if (lastName.endsWith(ACTION_SEND_GOAL_REQUEST))
+                                yield "rq" + rosAbsoluteTopicName + "/_action/send_goalRequest";
+                            else if (lastName.endsWith(ACTION_SEND_GOAL_RESPONSE))
+                                yield "rr" + rosAbsoluteTopicName + "/_action/send_goalReply";
+                            else if (lastName.endsWith(ACTION_GET_RESULT_REQUEST))
+                                yield "rq" + rosAbsoluteTopicName + "/_action/get_resultRequest";
+                            else if (lastName.endsWith(ACTION_GET_RESULT_RESPONSE))
+                                yield "rr" + rosAbsoluteTopicName + "/_action/get_resultReply";
+                            else if (lastName.endsWith(ACTION_FEEDBACK))
+                                yield "rt" + rosAbsoluteTopicName + "/_action/feedback";
+                            throw new IllegalArgumentException(
+                                    "Not a valid message name " + lastName + " for an Action");
+                        }
+                    };
                 }
             case SERVICE:
                 {
@@ -84,6 +105,7 @@ public class DdsNameMapper {
     public <M extends Message> String asFullyQualifiedDdsTypeName(
             MessageDescriptor<M> messageDescriptor) {
         var rosName = messageDescriptor.readName();
+        var fullname = rosName.toString();
         var lastName = rosName.lastName();
         var path = rosName.path();
         var interfaceType = messageDescriptor.readInterfaceType();
@@ -92,27 +114,48 @@ public class DdsNameMapper {
                 return String.format("%s::msg::dds_::%s_", path.get(0), path.get(1));
             case ACTION:
                 {
-                    if (lastName.endsWith(ACTION_GOAL))
-                        lastName = lastName.replace(ACTION_GOAL, "_SendGoal_Request_");
-                    else if (lastName.endsWith(ACTION_GET_RESULT))
-                        lastName = lastName.replace(ACTION_GET_RESULT, "_GetResult_Request_");
-                    else if (lastName.endsWith(ACTION_RESULT))
-                        lastName = lastName.replace(ACTION_RESULT, "_GetResult_Response_");
-                    else
-                        throw new IllegalArgumentException(
-                                "Not a valid message name " + lastName + " for an Action");
-                    return String.format("%s::action::dds_::%s", path.get(0), lastName);
+                    return switch (fullname) {
+                        case ACTION_MSGS_CANCEL_GOAL_REQUEST ->
+                                "action_msgs::srv::dds_::CancelGoal_Request_";
+                        case ACTION_MSGS_CANCEL_GOAL_RESPONSE ->
+                                "action_msgs::srv::dds_::CancelGoal_Response_";
+                        case ACTION_MSGS_STATUS -> "action_msgs::msg::dds_::GoalStatusArray_";
+                        default -> {
+                            if (lastName.endsWith(ACTION_SEND_GOAL_REQUEST))
+                                lastName =
+                                        lastName.replace(
+                                                ACTION_SEND_GOAL_REQUEST, "_SendGoal_Request");
+                            else if (lastName.endsWith(ACTION_SEND_GOAL_RESPONSE))
+                                lastName =
+                                        lastName.replace(
+                                                ACTION_SEND_GOAL_RESPONSE, "_SendGoal_Response");
+                            else if (lastName.endsWith(ACTION_GET_RESULT_REQUEST))
+                                lastName =
+                                        lastName.replace(
+                                                ACTION_GET_RESULT_REQUEST, "_GetResult_Request");
+                            else if (lastName.endsWith(ACTION_GET_RESULT_RESPONSE))
+                                lastName =
+                                        lastName.replace(
+                                                ACTION_GET_RESULT_RESPONSE, "_GetResult_Response");
+                            else if (lastName.endsWith(ACTION_FEEDBACK))
+                                lastName = lastName.replace(ACTION_FEEDBACK, "_FeedbackMessage");
+                            else
+                                throw new IllegalArgumentException(
+                                        "Not a valid message name " + lastName + " for an Action");
+                            yield String.format("%s::action::dds_::%s_", path.get(0), lastName);
+                        }
+                    };
                 }
             case SERVICE:
                 {
                     if (lastName.endsWith(SERVICE_REQUEST))
-                        lastName = lastName.replace(SERVICE_REQUEST, "_Request_");
+                        lastName = lastName.replace(SERVICE_REQUEST, "_Request");
                     else if (lastName.endsWith(SERICE_RESPONSE))
-                        lastName = lastName.replace(SERICE_RESPONSE, "_Response_");
+                        lastName = lastName.replace(SERICE_RESPONSE, "_Response");
                     else
                         throw new IllegalArgumentException(
                                 "Not a valid message name " + lastName + " for a Service");
-                    return String.format("%s::srv::dds_::%s", path.get(0), lastName);
+                    return String.format("%s::srv::dds_::%s_", path.get(0), lastName);
                 }
             default:
                 throw new UnsupportedOperationException("ROS interface type " + interfaceType);

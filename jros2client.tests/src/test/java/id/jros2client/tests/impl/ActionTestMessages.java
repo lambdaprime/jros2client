@@ -37,4 +37,24 @@ public class ActionTestMessages {
 
         static final String NAME = "test/TestActionResult";
     }
+
+    @MessageMetadata(
+            name = TestActionGoalRequestMessage.NAME,
+            interfaceType = RosInterfaceType.ACTION)
+    public class TestActionGoalRequestMessage implements Message {
+
+        static final String NAME = "action_msgs/CancelGoalServiceRequest";
+    }
+
+    @MessageMetadata(name = TestActionStatusMessage.NAME, interfaceType = RosInterfaceType.ACTION)
+    public class TestActionStatusMessage implements Message {
+
+        static final String NAME = "action_msgs/GoalStatusArray";
+    }
+
+    @MessageMetadata(name = TestActionFeedbackMessage.NAME, interfaceType = RosInterfaceType.ACTION)
+    public class TestActionFeedbackMessage implements Message {
+
+        static final String NAME = "test/TestActionGoalFeedback";
+    }
 }

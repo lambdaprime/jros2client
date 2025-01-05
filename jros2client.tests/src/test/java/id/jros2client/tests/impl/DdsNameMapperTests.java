@@ -43,6 +43,23 @@ public class DdsNameMapperTests {
                         new RosName("hello"),
                         new MessageDescriptor<>(ActionTestMessages.TestActionResultMessage.class)));
         Assertions.assertEquals(
+                "rq/hello/_action/cancel_goalRequest",
+                mapper.asFullyQualifiedDdsTopicName(
+                        new RosName("hello"),
+                        new MessageDescriptor<>(
+                                ActionTestMessages.TestActionGoalRequestMessage.class)));
+        Assertions.assertEquals(
+                "rt/hello/_action/status",
+                mapper.asFullyQualifiedDdsTopicName(
+                        new RosName("hello"),
+                        new MessageDescriptor<>(ActionTestMessages.TestActionStatusMessage.class)));
+        Assertions.assertEquals(
+                "rt/hello/_action/feedback",
+                mapper.asFullyQualifiedDdsTopicName(
+                        new RosName("hello"),
+                        new MessageDescriptor<>(
+                                ActionTestMessages.TestActionFeedbackMessage.class)));
+        Assertions.assertEquals(
                 "rq/helloRequest",
                 mapper.asFullyQualifiedDdsTopicName(
                         new RosName("hello"),
@@ -68,6 +85,20 @@ public class DdsNameMapperTests {
                 "test::action::dds_::Test_GetResult_Response_",
                 mapper.asFullyQualifiedDdsTypeName(
                         new MessageDescriptor<>(ActionTestMessages.TestActionResultMessage.class)));
+        Assertions.assertEquals(
+                "action_msgs::srv::dds_::CancelGoal_Request_",
+                mapper.asFullyQualifiedDdsTypeName(
+                        new MessageDescriptor<>(
+                                ActionTestMessages.TestActionGoalRequestMessage.class)));
+        Assertions.assertEquals(
+                "action_msgs::msg::dds_::GoalStatusArray_",
+                mapper.asFullyQualifiedDdsTypeName(
+                        new MessageDescriptor<>(ActionTestMessages.TestActionStatusMessage.class)));
+        Assertions.assertEquals(
+                "test::action::dds_::Test_FeedbackMessage_",
+                mapper.asFullyQualifiedDdsTypeName(
+                        new MessageDescriptor<>(
+                                ActionTestMessages.TestActionFeedbackMessage.class)));
         Assertions.assertEquals(
                 "test::srv::dds_::Test_Request_",
                 mapper.asFullyQualifiedDdsTypeName(
