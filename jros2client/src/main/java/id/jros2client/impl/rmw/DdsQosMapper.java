@@ -17,10 +17,12 @@
  */
 package id.jros2client.impl.rmw;
 
+import id.jros2client.qos.PublisherQos;
 import id.jros2client.qos.QosDurability;
 import id.jros2client.qos.QosReliability;
 import id.jros2client.qos.SubscriberQos;
 import pinorobotics.rtpstalk.qos.DurabilityType;
+import pinorobotics.rtpstalk.qos.PublisherQosPolicy;
 import pinorobotics.rtpstalk.qos.ReliabilityType;
 import pinorobotics.rtpstalk.qos.SubscriberQosPolicy;
 
@@ -47,5 +49,9 @@ public class DdsQosMapper {
 
     public SubscriberQosPolicy asDds(SubscriberQos qos) {
         return new SubscriberQosPolicy(asDds(qos.qosReliability()), asDds(qos.qosDurability()));
+    }
+
+    public PublisherQosPolicy asDds(PublisherQos qos) {
+        return new PublisherQosPolicy(asDds(qos.qosReliability()), asDds(qos.qosDurability()));
     }
 }

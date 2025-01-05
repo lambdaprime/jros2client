@@ -17,6 +17,7 @@
  */
 package id.jros2client;
 
+import id.jros2client.qos.PublisherQos;
 import id.jros2client.qos.SubscriberQos;
 import id.jrosclient.JRosClient;
 import id.jrosclient.RosVersion;
@@ -37,6 +38,22 @@ public interface JRos2Client extends JRosClient {
 
     JRos2ClientConfiguration getConfiguration();
 
+    /** Subscribe to ROS topic with specific QOS parameters */
+    <M extends Message> void subscribe(
+            String topic,
+            Class<M> messageClass,
+            SubscriberQos subscriberQos,
+            Subscriber<M> subscriber)
+            throws JRosClientException;
+
+    /** Publish to ROS topic with specific QOS parameters */
+    <M extends Message> void publish(PublisherQos publisherQos, TopicPublisher<M> publisher)
+            throws JRosClientException;
+
+    /** Subscribe to ROS topic with specific QOS parameters */
+    <M extends Message> void subscribe(SubscriberQos subscriberQos, TopicSubscriber<M> subscriber)
+            throws JRosClientException;
+
     /** {@inheritDoc} */
     @Override
     EnumSet<RosVersion> getSupportedRosVersion();
@@ -51,29 +68,26 @@ public interface JRos2Client extends JRosClient {
             String topic, Class<M> messageClass, Subscriber<M> subscriber)
             throws JRosClientException;
 
-    /** Subscribe to ROS topic with specific QOS parameters */
-    <M extends Message> void subscribe(
-            String topic,
-            Class<M> messageClass,
-            SubscriberQos subscriberQos,
-            Subscriber<M> subscriber)
-            throws JRosClientException;
-
     /**
      * {@inheritDoc}
      *
      * <p>By default uses {@link SubscriberQos#DEFAULT_SUBSCRIBER_QOS}
      */
     @Override
-    <M extends Message> void subscribe(TopicSubscriber<M> subscriber) throws JRosClientException;
+    default <M extends Message> void subscribe(TopicSubscriber<M> subscriber)
+            throws JRosClientException {
+        subscribe(SubscriberQos.DEFAULT_SUBSCRIBER_QOS, subscriber);
+    }
 
-    /** Subscribe to ROS topic with specific QOS parameters */
-    <M extends Message> void subscribe(SubscriberQos subscriberQos, TopicSubscriber<M> subscriber)
-            throws JRosClientException;
-
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     * Simplified version of {@link #publish(TopicPublisher, PublisherQos) with PublisherQos#DEFAULT_PUBLISHER_QOS
+     */
     @Override
-    <M extends Message> void publish(TopicPublisher<M> publisher) throws JRosClientException;
+    default <M extends Message> void publish(TopicPublisher<M> publisher)
+            throws JRosClientException {
+        publish(PublisherQos.DEFAULT_PUBLISHER_QOS, publisher);
+    }
 
     /** {@inheritDoc} */
     @Override

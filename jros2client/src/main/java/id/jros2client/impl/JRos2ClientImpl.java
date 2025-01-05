@@ -22,6 +22,7 @@ import id.jros2client.JRos2ClientConfiguration;
 import id.jros2client.impl.rmw.DdsNameMapper;
 import id.jros2client.impl.rmw.DdsQosMapper;
 import id.jros2client.impl.rmw.RmwConstants;
+import id.jros2client.qos.PublisherQos;
 import id.jros2client.qos.SubscriberQos;
 import id.jrosclient.JRosClientMetrics;
 import id.jrosclient.RosVersion;
@@ -93,19 +94,7 @@ public class JRos2ClientImpl extends IdempotentService implements JRos2Client {
     @Override
     public <M extends Message> void subscribe(
             String topic, Class<M> messageClass, Subscriber<M> subscriber)
-            throws JRosClientException {
-        subscribe(topic, messageClass, SubscriberQos.DEFAULT_SUBSCRIBER_QOS, subscriber);
-    }
-
-    @Override
-    public <M extends Message> void subscribe(TopicSubscriber<M> subscriber)
-            throws JRosClientException {
-        subscribe(
-                subscriber.getTopic(),
-                subscriber.getMessageClass(),
-                SubscriberQos.DEFAULT_SUBSCRIBER_QOS,
-                subscriber);
-    }
+            throws JRosClientException {}
 
     @Override
     public <M extends Message> void subscribe(
@@ -133,7 +122,7 @@ public class JRos2ClientImpl extends IdempotentService implements JRos2Client {
     }
 
     @Override
-    public <M extends Message> void publish(TopicPublisher<M> publisher)
+    public <M extends Message> void publish(PublisherQos publisherQos, TopicPublisher<M> publisher)
             throws JRosClientException {
         start();
         logger.info(
@@ -146,7 +135,7 @@ public class JRos2ClientImpl extends IdempotentService implements JRos2Client {
         rtpsTalkClient.publish(
                 topic,
                 messageName,
-                RmwConstants.DEFAULT_PUBLISHER_QOS,
+                qosMapper.asDds(publisherQos),
                 RmwConstants.DEFAULT_WRITER_SETTINGS,
                 transformer);
         PUBLISH_CALLS_COUNT_METER.add(1, JRos2ClientConstants.METRIC_ATTRS);
