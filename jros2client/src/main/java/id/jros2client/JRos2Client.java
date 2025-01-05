@@ -24,7 +24,9 @@ import id.jrosclient.RosVersion;
 import id.jrosclient.TopicPublisher;
 import id.jrosclient.TopicSubscriber;
 import id.jrosclient.exceptions.JRosClientException;
+import id.jroscommon.RosName;
 import id.jrosmessages.Message;
+import id.jrosmessages.MessageDescriptor;
 import java.util.EnumSet;
 import java.util.concurrent.Flow.Subscriber;
 
@@ -40,8 +42,8 @@ public interface JRos2Client extends JRosClient {
 
     /** Subscribe to ROS topic with specific QOS parameters */
     <M extends Message> void subscribe(
-            String topic,
-            Class<M> messageClass,
+            RosName topic,
+            MessageDescriptor<M> messageDescriptor,
             SubscriberQos subscriberQos,
             Subscriber<M> subscriber)
             throws JRosClientException;
@@ -51,8 +53,14 @@ public interface JRos2Client extends JRosClient {
             throws JRosClientException;
 
     /** Subscribe to ROS topic with specific QOS parameters */
-    <M extends Message> void subscribe(SubscriberQos subscriberQos, TopicSubscriber<M> subscriber)
-            throws JRosClientException;
+    default <M extends Message> void subscribe(
+            SubscriberQos subscriberQos, TopicSubscriber<M> subscriber) throws JRosClientException {
+        subscribe(
+                subscriber.getTopic(),
+                subscriber.getMessageDescriptor(),
+                subscriberQos,
+                subscriber);
+    }
 
     /** {@inheritDoc} */
     @Override
@@ -64,9 +72,11 @@ public interface JRos2Client extends JRosClient {
      * <p>By default uses {@link SubscriberQos#DEFAULT_SUBSCRIBER_QOS}
      */
     @Override
-    <M extends Message> void subscribe(
-            String topic, Class<M> messageClass, Subscriber<M> subscriber)
-            throws JRosClientException;
+    default <M extends Message> void subscribe(
+            RosName topic, MessageDescriptor<M> messageDescriptor, Subscriber<M> subscriber)
+            throws JRosClientException {
+        subscribe(topic, messageDescriptor, SubscriberQos.DEFAULT_SUBSCRIBER_QOS, subscriber);
+    }
 
     /**
      * {@inheritDoc}
@@ -91,12 +101,12 @@ public interface JRos2Client extends JRosClient {
 
     /** {@inheritDoc} */
     @Override
-    <M extends Message> void unpublish(String topic, Class<M> messageClass)
+    <M extends Message> void unpublish(RosName topic, MessageDescriptor<M> messageDescriptor)
             throws JRosClientException;
 
     /** {@inheritDoc} */
     @Override
-    boolean hasPublisher(String topic);
+    boolean hasPublisher(RosName topic);
 
     /** {@inheritDoc} */
     @Override

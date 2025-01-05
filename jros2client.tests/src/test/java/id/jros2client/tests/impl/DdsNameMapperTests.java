@@ -18,7 +18,8 @@
 package id.jros2client.tests.impl;
 
 import id.jros2client.impl.rmw.DdsNameMapper;
-import id.jrosclient.utils.RosNameUtils;
+import id.jroscommon.RosName;
+import id.jrosmessages.MessageDescriptor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -28,25 +29,54 @@ import org.junit.jupiter.api.Test;
 public class DdsNameMapperTests {
 
     @Test
-    public void test_subscribe_happy() throws Exception {
-        var mapper = new DdsNameMapper(new RosNameUtils());
+    public void test_asFullyQualifiedDdsTopicName() throws Exception {
+        var mapper = new DdsNameMapper();
 
         Assertions.assertEquals(
                 "rq/hello/_action/send_goalRequest",
                 mapper.asFullyQualifiedDdsTopicName(
-                        "hello", ActionTestMessages.TestActionGoalMessage.class));
+                        new RosName("hello"),
+                        new MessageDescriptor<>(ActionTestMessages.TestActionGoalMessage.class)));
         Assertions.assertEquals(
                 "rr/hello/_action/get_resultReply",
                 mapper.asFullyQualifiedDdsTopicName(
-                        "hello", ActionTestMessages.TestActionResultMessage.class));
-
+                        new RosName("hello"),
+                        new MessageDescriptor<>(ActionTestMessages.TestActionResultMessage.class)));
         Assertions.assertEquals(
                 "rq/helloRequest",
                 mapper.asFullyQualifiedDdsTopicName(
-                        "hello", ServiceTestMessages.TestServiceRequestMessage.class));
+                        new RosName("hello"),
+                        new MessageDescriptor<>(
+                                ServiceTestMessages.TestServiceRequestMessage.class)));
         Assertions.assertEquals(
                 "rr/helloReply",
                 mapper.asFullyQualifiedDdsTopicName(
-                        "hello", ServiceTestMessages.TestServiceResponseMessage.class));
+                        new RosName("hello"),
+                        new MessageDescriptor<>(
+                                ServiceTestMessages.TestServiceResponseMessage.class)));
+    }
+
+    @Test
+    public void test_asFullyQualifiedDdsTypeName() throws Exception {
+        var mapper = new DdsNameMapper();
+
+        Assertions.assertEquals(
+                "test::action::dds_::Test_SendGoal_Request_",
+                mapper.asFullyQualifiedDdsTypeName(
+                        new MessageDescriptor<>(ActionTestMessages.TestActionGoalMessage.class)));
+        Assertions.assertEquals(
+                "test::action::dds_::Test_GetResult_Response_",
+                mapper.asFullyQualifiedDdsTypeName(
+                        new MessageDescriptor<>(ActionTestMessages.TestActionResultMessage.class)));
+        Assertions.assertEquals(
+                "test::srv::dds_::Test_Request_",
+                mapper.asFullyQualifiedDdsTypeName(
+                        new MessageDescriptor<>(
+                                ServiceTestMessages.TestServiceRequestMessage.class)));
+        Assertions.assertEquals(
+                "test::srv::dds_::Test_Response_",
+                mapper.asFullyQualifiedDdsTypeName(
+                        new MessageDescriptor<>(
+                                ServiceTestMessages.TestServiceResponseMessage.class)));
     }
 }

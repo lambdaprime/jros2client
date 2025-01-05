@@ -24,13 +24,14 @@ import id.jros2client.impl.rmw.DdsQosMapper;
 import id.jros2client.impl.rmw.RmwConstants;
 import id.jros2client.qos.PublisherQos;
 import id.jros2client.qos.SubscriberQos;
-import id.jrosclient.JRosClientMetrics;
 import id.jrosclient.RosVersion;
 import id.jrosclient.TopicPublisher;
 import id.jrosclient.TopicSubmissionPublisher;
-import id.jrosclient.TopicSubscriber;
 import id.jrosclient.exceptions.JRosClientException;
+import id.jrosclient.metrics.JRosClientMetrics;
+import id.jroscommon.RosName;
 import id.jrosmessages.Message;
+import id.jrosmessages.MessageDescriptor;
 import id.xfunction.concurrent.flow.TransformPublisher;
 import id.xfunction.concurrent.flow.TransformSubscriber;
 import id.xfunction.logging.TracingToken;
@@ -93,31 +94,22 @@ public class JRos2ClientImpl extends IdempotentService implements JRos2Client {
 
     @Override
     public <M extends Message> void subscribe(
-            String topic, Class<M> messageClass, Subscriber<M> subscriber)
-            throws JRosClientException {}
-
-    @Override
-    public <M extends Message> void subscribe(
-            SubscriberQos subscriberQos, TopicSubscriber<M> subscriber) throws JRosClientException {
-        subscribe(subscriber.getTopic(), subscriber.getMessageClass(), subscriberQos, subscriber);
-    }
-
-    @Override
-    public <M extends Message> void subscribe(
-            String topic,
-            Class<M> messageClass,
+            RosName topic,
+            MessageDescriptor<M> messageDescriptor,
             SubscriberQos subscriberQos,
             Subscriber<M> subscriber)
             throws JRosClientException {
         start();
         logger.info(
                 "Subscribing to {0} with type {1}, qos {2}",
-                topic, messageClass.getName(), subscriberQos);
-        var messageName = rosNameMapper.asFullyQualifiedDdsTypeName(messageClass);
-        topic = rosNameMapper.asFullyQualifiedDdsTopicName(topic, messageClass);
+                topic, messageDescriptor.getMessageClass().getName(), subscriberQos);
+        var messageName = rosNameMapper.asFullyQualifiedDdsTypeName(messageDescriptor);
+        var rmwTopic = rosNameMapper.asFullyQualifiedDdsTopicName(topic, messageDescriptor);
         var transformer =
-                new TransformSubscriber<>(subscriber, messageUtils.deserializer(messageClass));
-        rtpsTalkClient.subscribe(topic, messageName, qosMapper.asDds(subscriberQos), transformer);
+                new TransformSubscriber<>(
+                        subscriber, messageUtils.deserializer(messageDescriptor.getMessageClass()));
+        rtpsTalkClient.subscribe(
+                rmwTopic, messageName, qosMapper.asDds(subscriberQos), transformer);
         SUBSCRIBE_CALLS_COUNT_METER.add(1, JRos2ClientConstants.METRIC_ATTRS);
     }
 
@@ -125,12 +117,12 @@ public class JRos2ClientImpl extends IdempotentService implements JRos2Client {
     public <M extends Message> void publish(PublisherQos publisherQos, TopicPublisher<M> publisher)
             throws JRosClientException {
         start();
-        logger.info(
-                "Publishing to {0} type {1}",
-                publisher.getTopic(), publisher.getMessageClass().getName());
-        var messageClass = publisher.getMessageClass();
-        var messageName = rosNameMapper.asFullyQualifiedDdsTypeName(messageClass);
-        var topic = rosNameMapper.asFullyQualifiedDdsTopicName(publisher.getTopic(), messageClass);
+        var messageDescriptor = publisher.getMessageDescriptor();
+        var messageClass = messageDescriptor.getMessageClass();
+        logger.info("Publishing to {0} type {1}", publisher.getTopic(), messageClass.getName());
+        var messageName = rosNameMapper.asFullyQualifiedDdsTypeName(messageDescriptor);
+        var topic =
+                rosNameMapper.asFullyQualifiedDdsTopicName(publisher.getTopic(), messageDescriptor);
         var transformer = new TransformPublisher<>(publisher, messageUtils.serializer());
         rtpsTalkClient.publish(
                 topic,
@@ -142,7 +134,7 @@ public class JRos2ClientImpl extends IdempotentService implements JRos2Client {
     }
 
     @Override
-    public <M extends Message> void unpublish(String topic, Class<M> messageClass)
+    public <M extends Message> void unpublish(RosName topic, MessageDescriptor<M> messageDescriptor)
             throws JRosClientException {
         new UnsupportedOperationException().printStackTrace();
     }
@@ -153,7 +145,7 @@ public class JRos2ClientImpl extends IdempotentService implements JRos2Client {
     }
 
     @Override
-    public boolean hasPublisher(String topic) {
+    public boolean hasPublisher(RosName topic) {
         new UnsupportedOperationException().printStackTrace();
         return false;
     }
