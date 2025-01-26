@@ -65,11 +65,11 @@ public class MainActivity extends Activity {
         }
         var topicNameView = (EditText) findViewById(R.id.topicName);
         setupLogging();
-        var config = new JRos2ClientConfiguration.Builder().build();
         ((Button) findViewById(R.id.subscribe))
                 .setOnClickListener(
                         view -> {
                             stop();
+                            var config = new JRos2ClientConfiguration.Builder().build();
                             client = new JRos2ClientFactory().createClient(config);
                             executor = Executors.newSingleThreadExecutor();
                             executor.submit(
@@ -92,6 +92,7 @@ public class MainActivity extends Activity {
                 .setOnClickListener(
                         view -> {
                             stop();
+                            var config = new JRos2ClientConfiguration.Builder().build();
                             client = new JRos2ClientFactory().createClient(config);
                             var publisher =
                                     new TopicSubmissionPublisher<>(
@@ -132,6 +133,7 @@ public class MainActivity extends Activity {
                         })
                 .start();
         Unchecked.run(future::get);
+        LOGGER.info("Stopped");
     }
 
     private void setupLogging() {
