@@ -1,3 +1,12 @@
+# Version 12
+
+- Fix problem in jros2droid when consecutive Subscribe or Publish operations called by the user would be ignored by remote participant because of the same GUID prefix
+- Add mapping support for action_msgs and more Action topics and messages (SendGoal, Feedback)
+- Upgrade to new version of jrosclient and rtpstalk
+- Allow users to specify PublisherQos when publish to ROS topic
+
+[jros2client-v12.0.zip](https://github.com/lambdaprime/jros2client/raw/main/jros2client/release/jros2client-v12.0.zip)
+
 # Version 11
 
 - Changing type of metrics

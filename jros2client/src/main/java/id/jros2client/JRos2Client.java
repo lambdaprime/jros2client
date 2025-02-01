@@ -91,7 +91,9 @@ public interface JRos2Client extends JRosClient {
 
     /**
      * {@inheritDoc}
-     * Simplified version of {@link #publish(TopicPublisher, PublisherQos) with PublisherQos#DEFAULT_PUBLISHER_QOS
+     *
+     * <p>Simplified version of {@link #publish(PublisherQos, TopicPublisher)} with {@link
+     * PublisherQos#DEFAULT_PUBLISHER_QOS}
      */
     @Override
     default <M extends Message> void publish(TopicPublisher<M> publisher)
