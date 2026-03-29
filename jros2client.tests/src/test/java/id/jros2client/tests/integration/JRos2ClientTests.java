@@ -234,7 +234,8 @@ public class JRos2ClientTests {
                             System.out.println(item.data);
                             Assertions.assertEquals(
                                     """
-                                    { "data": "hello there" }""",
+                                    { "data": "hello there" }\
+                                    """,
                                     item.toString());
                             if (++count == 5) {
                                 getSubscription().get().cancel();

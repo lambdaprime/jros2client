@@ -2,6 +2,7 @@
 **/build/
 **/.gradle/
 **/.settings/
+**/bld/
 **/.project
 **/.classpath
 /**/release/*-SNAPSHOT.zip
