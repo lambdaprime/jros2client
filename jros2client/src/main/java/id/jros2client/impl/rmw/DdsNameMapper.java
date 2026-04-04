@@ -20,6 +20,9 @@ package id.jros2client.impl.rmw;
 import id.jroscommon.RosName;
 import id.jrosmessages.Message;
 import id.jrosmessages.MessageDescriptor;
+import id.jrosmessages.RosInterfaceType;
+import id.jrosmessages.UntypedMessageMetadata;
+import id.xfunction.Preconditions;
 
 /**
  * Mapper of ROS2 names (topics, types) to DDS names.
@@ -48,8 +51,22 @@ public class DdsNameMapper {
     private static final String ACTION_MSGS_CANCEL_GOAL_RESPONSE =
             "action_msgs/CancelGoalServiceResponse";
     private static final String ACTION_MSGS_STATUS = "action_msgs/GoalStatusArray";
+
+    private static final String DDS_ACTION_CANCEL_GOAL_REQUEST =
+            "action_msgs::srv::dds_::CancelGoal_Request_";
+    private static final String DDS_ACTION_CANCEL_GOAL_RESPONSE =
+            "action_msgs::srv::dds_::CancelGoal_Response_";
+    private static final String DDS_ACTION_STATUS = "action_msgs::msg::dds_::GoalStatusArray_";
+    private static final String DDS_ACTION_SEND_GOAL_REQUEST = "_SendGoal_Request";
+    private static final String DDS_ACTION_SEND_GOAL_RESPONSE = "_SendGoal_Response";
+    private static final String DDS_ACTION_GET_RESULT_REQUEST = "_GetResult_Request";
+    private static final String DDS_ACTION_GET_RESULT_RESPONSE = "_GetResult_Response";
+    private static final String DDS_ACTION_FEEDBACK = "_FeedbackMessage";
+
     private static final String SERVICE_REQUEST = "ServiceRequest";
     private static final String SERICE_RESPONSE = "ServiceResponse";
+    private static final String DDS_SERVICE_REQUEST = "_Request";
+    private static final String DDS_SERICE_RESPONSE = "_Response";
 
     /** Returns DDS topic name */
     public <M extends Message> String asFullyQualifiedDdsTopicName(
@@ -115,11 +132,9 @@ public class DdsNameMapper {
             case ACTION:
                 {
                     return switch (fullname) {
-                        case ACTION_MSGS_CANCEL_GOAL_REQUEST ->
-                                "action_msgs::srv::dds_::CancelGoal_Request_";
-                        case ACTION_MSGS_CANCEL_GOAL_RESPONSE ->
-                                "action_msgs::srv::dds_::CancelGoal_Response_";
-                        case ACTION_MSGS_STATUS -> "action_msgs::msg::dds_::GoalStatusArray_";
+                        case ACTION_MSGS_CANCEL_GOAL_REQUEST -> DDS_ACTION_CANCEL_GOAL_REQUEST;
+                        case ACTION_MSGS_CANCEL_GOAL_RESPONSE -> DDS_ACTION_CANCEL_GOAL_RESPONSE;
+                        case ACTION_MSGS_STATUS -> DDS_ACTION_STATUS;
                         default -> {
                             if (lastName.endsWith(ACTION_SEND_GOAL_REQUEST))
                                 lastName =
@@ -160,5 +175,105 @@ public class DdsNameMapper {
             default:
                 throw new UnsupportedOperationException("ROS interface type " + interfaceType);
         }
+    }
+
+    public RosName toRosTopicName(String fullyQualifiedDdsTopicName) {
+        // Parse DDS fully qualified topic name to extract the base ROS topic name
+        String base = fullyQualifiedDdsTopicName;
+        if (base.startsWith("rt")
+                && !base.contains("/_action/")
+                && !(base.endsWith("Request") || base.endsWith("Response"))) {
+            // MESSAGE case – strip the leading “rt”
+            base = base.substring(2);
+        } else if (base.contains("/_action/")) {
+            // ACTION case – remove the "/_action/..." suffix and the leading “rq/rr/rt”
+            int idx = base.indexOf("/_action/");
+            String prefix = base.substring(0, idx);
+            if (prefix.startsWith("rq") || prefix.startsWith("rr") || prefix.startsWith("rt")) {
+                base = base.substring(2, idx);
+            } else {
+                base = base.substring(0, idx);
+            }
+        } else if (base.endsWith("Request")
+                || base.endsWith("Response")
+                || base.endsWith("Reply")) {
+            // SERVICE case – drop the “Request”/“Response” suffix and the leading “rq/rr”
+            String withoutSuffix = base.replaceAll("(Request|Response|Reply)$", "");
+            if (withoutSuffix.startsWith("rq")) {
+                base = withoutSuffix.substring(2);
+            } else if (withoutSuffix.startsWith("rr")) {
+                base = withoutSuffix.substring(2);
+            } else {
+                base = withoutSuffix;
+            }
+        }
+        // Remove a possible leading '/' that remained after stripping prefixes
+        base = base.replaceAll("^/", "");
+        // Reconstruct the ROS name – assume a static factory `global(String)`
+        return new RosName(base);
+    }
+
+    public UntypedMessageMetadata toMessageMetadata(String fullyQualifiedDdsTypeName) {
+        if (fullyQualifiedDdsTypeName.startsWith("action_msgs::")) {
+            return new UntypedMessageMetadata(
+                    new RosName(
+                            switch (fullyQualifiedDdsTypeName) {
+                                case DDS_ACTION_CANCEL_GOAL_REQUEST ->
+                                        ACTION_MSGS_CANCEL_GOAL_REQUEST;
+                                case DDS_ACTION_CANCEL_GOAL_RESPONSE ->
+                                        ACTION_MSGS_CANCEL_GOAL_RESPONSE;
+                                case DDS_ACTION_STATUS -> ACTION_MSGS_STATUS;
+                                default ->
+                                        throw new IllegalArgumentException(
+                                                "Not a valid type name "
+                                                        + fullyQualifiedDdsTypeName
+                                                        + " for an Action");
+                            }),
+                    RosInterfaceType.ACTION);
+        } else if (fullyQualifiedDdsTypeName.contains("::msg::")) {
+            var fullRosName =
+                    fullyQualifiedDdsTypeName.replaceAll("(\\w+)::msg::dds_::(\\w+)_", "$1/$2");
+            return new UntypedMessageMetadata(new RosName(fullRosName), RosInterfaceType.MESSAGE);
+        } else if (fullyQualifiedDdsTypeName.contains("::action::dds_::")) {
+            var tokens = fullyQualifiedDdsTypeName.split("::action::dds_::");
+            Preconditions.equals(
+                    2, tokens.length, "Not a valid type name " + fullyQualifiedDdsTypeName);
+            var lastName = tokens[1].replaceAll("_$", "");
+            if (lastName.endsWith(DDS_ACTION_SEND_GOAL_REQUEST))
+                lastName = lastName.replace(DDS_ACTION_SEND_GOAL_REQUEST, ACTION_SEND_GOAL_REQUEST);
+            else if (lastName.endsWith(DDS_ACTION_SEND_GOAL_RESPONSE))
+                lastName =
+                        lastName.replace(DDS_ACTION_SEND_GOAL_RESPONSE, ACTION_SEND_GOAL_RESPONSE);
+            else if (lastName.endsWith(DDS_ACTION_GET_RESULT_REQUEST))
+                lastName =
+                        lastName.replace(DDS_ACTION_GET_RESULT_REQUEST, ACTION_GET_RESULT_REQUEST);
+            else if (lastName.endsWith(DDS_ACTION_GET_RESULT_RESPONSE))
+                lastName =
+                        lastName.replace(
+                                DDS_ACTION_GET_RESULT_RESPONSE, ACTION_GET_RESULT_RESPONSE);
+            else if (lastName.endsWith(DDS_ACTION_FEEDBACK))
+                lastName = lastName.replace(DDS_ACTION_FEEDBACK, ACTION_FEEDBACK);
+            else
+                throw new IllegalArgumentException(
+                        "Not a valid message name " + lastName + " for an Action");
+            return new UntypedMessageMetadata(
+                    new RosName(tokens[0], lastName), RosInterfaceType.ACTION);
+        } else if (fullyQualifiedDdsTypeName.contains("::srv::dds_::")) {
+            var tokens = fullyQualifiedDdsTypeName.split("::srv::dds_::");
+            Preconditions.equals(
+                    2, tokens.length, "Not a valid type name " + fullyQualifiedDdsTypeName);
+            var lastName = tokens[1].replaceAll("_$", "");
+            if (lastName.endsWith(DDS_SERVICE_REQUEST))
+                lastName = lastName.replace(DDS_SERVICE_REQUEST, SERVICE_REQUEST);
+            else if (lastName.endsWith(DDS_SERICE_RESPONSE))
+                lastName = lastName.replace(DDS_SERICE_RESPONSE, SERICE_RESPONSE);
+            else
+                throw new IllegalArgumentException(
+                        "Not a valid message name " + lastName + " for a Service");
+            return new UntypedMessageMetadata(
+                    new RosName(tokens[0], lastName), RosInterfaceType.SERVICE);
+        } else
+            throw new UnsupportedOperationException(
+                    "ROS interface type " + fullyQualifiedDdsTypeName);
     }
 }

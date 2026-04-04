@@ -17,97 +17,95 @@
  */
 package id.jros2client.tests.impl;
 
+import static org.junit.jupiter.params.provider.Arguments.arguments;
+
 import id.jros2client.impl.rmw.DdsNameMapper;
 import id.jroscommon.RosName;
 import id.jrosmessages.MessageDescriptor;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * @author lambdaprime intid@protonmail.com
  */
 public class DdsNameMapperTests {
 
-    @Test
-    public void test_asFullyQualifiedDdsTopicName() throws Exception {
-        var mapper = new DdsNameMapper();
-
-        Assertions.assertEquals(
-                "rq/hello/_action/send_goalRequest",
-                mapper.asFullyQualifiedDdsTopicName(
-                        new RosName("hello"),
-                        new MessageDescriptor<>(ActionTestMessages.TestActionGoalMessage.class)));
-        Assertions.assertEquals(
-                "rr/hello/_action/get_resultReply",
-                mapper.asFullyQualifiedDdsTopicName(
-                        new RosName("hello"),
-                        new MessageDescriptor<>(ActionTestMessages.TestActionResultMessage.class)));
-        Assertions.assertEquals(
-                "rq/hello/_action/cancel_goalRequest",
-                mapper.asFullyQualifiedDdsTopicName(
-                        new RosName("hello"),
+    private static Stream<Arguments> provideFullyQualifiedDdsTopicNameArguments() {
+        return Stream.of(
+                arguments(
+                        new MessageDescriptor<>(ActionTestMessages.TestActionGoalMessage.class),
+                        "rq/hello/_action/send_goalRequest"),
+                arguments(
+                        new MessageDescriptor<>(ActionTestMessages.TestActionResultMessage.class),
+                        "rr/hello/_action/get_resultReply"),
+                arguments(
                         new MessageDescriptor<>(
-                                ActionTestMessages.TestActionGoalRequestMessage.class)));
-        Assertions.assertEquals(
-                "rt/hello/_action/status",
-                mapper.asFullyQualifiedDdsTopicName(
-                        new RosName("hello"),
-                        new MessageDescriptor<>(ActionTestMessages.TestActionStatusMessage.class)));
-        Assertions.assertEquals(
-                "rt/hello/_action/feedback",
-                mapper.asFullyQualifiedDdsTopicName(
-                        new RosName("hello"),
+                                ActionTestMessages.TestActionGoalRequestMessage.class),
+                        "rq/hello/_action/cancel_goalRequest"),
+                arguments(
+                        new MessageDescriptor<>(ActionTestMessages.TestActionStatusMessage.class),
+                        "rt/hello/_action/status"),
+                arguments(
+                        new MessageDescriptor<>(ActionTestMessages.TestActionFeedbackMessage.class),
+                        "rt/hello/_action/feedback"),
+                arguments(
                         new MessageDescriptor<>(
-                                ActionTestMessages.TestActionFeedbackMessage.class)));
-        Assertions.assertEquals(
-                "rq/helloRequest",
-                mapper.asFullyQualifiedDdsTopicName(
-                        new RosName("hello"),
+                                ServiceTestMessages.TestServiceRequestMessage.class),
+                        "rq/helloRequest"),
+                arguments(
                         new MessageDescriptor<>(
-                                ServiceTestMessages.TestServiceRequestMessage.class)));
-        Assertions.assertEquals(
-                "rr/helloReply",
-                mapper.asFullyQualifiedDdsTopicName(
-                        new RosName("hello"),
-                        new MessageDescriptor<>(
-                                ServiceTestMessages.TestServiceResponseMessage.class)));
+                                ServiceTestMessages.TestServiceResponseMessage.class),
+                        "rr/helloReply"));
     }
 
-    @Test
-    public void test_asFullyQualifiedDdsTypeName() throws Exception {
+    @ParameterizedTest
+    @MethodSource("provideFullyQualifiedDdsTopicNameArguments")
+    void test_topicNames(MessageDescriptor<?> descriptor, String expected) {
         var mapper = new DdsNameMapper();
+        var name = new RosName("hello");
+        Assertions.assertEquals(expected, mapper.asFullyQualifiedDdsTopicName(name, descriptor));
 
-        Assertions.assertEquals(
-                "test::action::dds_::Test_SendGoal_Request_",
-                mapper.asFullyQualifiedDdsTypeName(
-                        new MessageDescriptor<>(ActionTestMessages.TestActionGoalMessage.class)));
-        Assertions.assertEquals(
-                "test::action::dds_::Test_GetResult_Response_",
-                mapper.asFullyQualifiedDdsTypeName(
-                        new MessageDescriptor<>(ActionTestMessages.TestActionResultMessage.class)));
-        Assertions.assertEquals(
-                "action_msgs::srv::dds_::CancelGoal_Request_",
-                mapper.asFullyQualifiedDdsTypeName(
+        Assertions.assertEquals(name, mapper.toRosTopicName(expected));
+    }
+
+    private static Stream<Arguments> provideFullyQualifiedDdsTypeNameArguments() {
+        return Stream.of(
+                arguments(
+                        new MessageDescriptor<>(ActionTestMessages.TestActionGoalMessage.class),
+                        "test::action::dds_::Test_SendGoal_Request_"),
+                arguments(
+                        new MessageDescriptor<>(ActionTestMessages.TestActionResultMessage.class),
+                        "test::action::dds_::Test_GetResult_Response_"),
+                arguments(
                         new MessageDescriptor<>(
-                                ActionTestMessages.TestActionGoalRequestMessage.class)));
-        Assertions.assertEquals(
-                "action_msgs::msg::dds_::GoalStatusArray_",
-                mapper.asFullyQualifiedDdsTypeName(
-                        new MessageDescriptor<>(ActionTestMessages.TestActionStatusMessage.class)));
-        Assertions.assertEquals(
-                "test::action::dds_::Test_FeedbackMessage_",
-                mapper.asFullyQualifiedDdsTypeName(
+                                ActionTestMessages.TestActionGoalRequestMessage.class),
+                        "action_msgs::srv::dds_::CancelGoal_Request_"),
+                arguments(
+                        new MessageDescriptor<>(ActionTestMessages.TestActionStatusMessage.class),
+                        "action_msgs::msg::dds_::GoalStatusArray_"),
+                arguments(
+                        new MessageDescriptor<>(ActionTestMessages.TestActionFeedbackMessage.class),
+                        "test::action::dds_::Test_FeedbackMessage_"),
+                arguments(
                         new MessageDescriptor<>(
-                                ActionTestMessages.TestActionFeedbackMessage.class)));
-        Assertions.assertEquals(
-                "test::srv::dds_::Test_Request_",
-                mapper.asFullyQualifiedDdsTypeName(
+                                ServiceTestMessages.TestServiceRequestMessage.class),
+                        "test::srv::dds_::Test_Request_"),
+                arguments(
                         new MessageDescriptor<>(
-                                ServiceTestMessages.TestServiceRequestMessage.class)));
-        Assertions.assertEquals(
-                "test::srv::dds_::Test_Response_",
-                mapper.asFullyQualifiedDdsTypeName(
-                        new MessageDescriptor<>(
-                                ServiceTestMessages.TestServiceResponseMessage.class)));
+                                ServiceTestMessages.TestServiceResponseMessage.class),
+                        "test::srv::dds_::Test_Response_"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideFullyQualifiedDdsTypeNameArguments")
+    void test_typeNames(MessageDescriptor<?> descriptor, String expected) {
+        var mapper = new DdsNameMapper();
+        Assertions.assertEquals(expected, mapper.asFullyQualifiedDdsTypeName(descriptor));
+        var messageMetadata = mapper.toMessageMetadata(expected);
+        Assertions.assertEquals(descriptor.readInterfaceType(), messageMetadata.interfaceType());
+        Assertions.assertEquals(descriptor.readName(), messageMetadata.name());
     }
 }

@@ -21,7 +21,7 @@ import id.jrosclient.TopicSubscriber;
 import id.jrosmessages.std_msgs.StringMessage;
 
 /**
- * Subscribes to ROS topic
+ * Subscribe to ROS topic
  *
  * @author lambdaprime intid@protonmail.com
  */

@@ -19,6 +19,7 @@ package id.jros2client.impl;
 
 import id.jros2client.JRos2Client;
 import id.jros2client.JRos2ClientConfiguration;
+import id.jros2client.Ros2DiscoveryInfo;
 import id.jros2client.impl.rmw.DdsNameMapper;
 import id.jros2client.impl.rmw.DdsQosMapper;
 import id.jros2client.impl.rmw.RmwConstants;
@@ -41,8 +42,10 @@ import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
 import java.util.EnumSet;
+import java.util.Optional;
 import java.util.concurrent.Flow.Subscriber;
 import pinorobotics.rtpstalk.RtpsTalkClient;
+import pinorobotics.rtpstalk.TopicDiscoveryInfo;
 
 /**
  * Main class of the library which allows to interact with ROS.
@@ -73,13 +76,13 @@ public class JRos2ClientImpl extends IdempotentService implements JRos2Client {
                     .build();
 
     private DdsNameMapper rosNameMapper;
+    private DdsQosMapper qosMapper;
     private RtpsTalkClient rtpsTalkClient;
     private TracingToken tracingToken;
     private XLogger logger;
     private MessageUtils messageUtils;
     private JRos2ClientConfiguration config;
     private boolean isClosed;
-    private DdsQosMapper qosMapper;
 
     public JRos2ClientImpl(JRos2ClientConfiguration config, ObjectsFactory factory) {
         this.config = config;
@@ -111,6 +114,35 @@ public class JRos2ClientImpl extends IdempotentService implements JRos2Client {
         rtpsTalkClient.subscribe(
                 rmwTopic, messageName, qosMapper.asDds(subscriberQos), transformer);
         SUBSCRIBE_CALLS_COUNT_METER.add(1, JRos2ClientConstants.METRIC_ATTRS);
+    }
+
+    @Override
+    public void subscribe(Subscriber<Ros2DiscoveryInfo> subscriber) {
+        start();
+        rtpsTalkClient.subscribe(
+                new TransformSubscriber<TopicDiscoveryInfo, Ros2DiscoveryInfo>(
+                        subscriber,
+                        ddsInfo -> {
+                            try {
+                                var ros2Info =
+                                        new Ros2DiscoveryInfo(
+                                                rosNameMapper.toRosTopicName(ddsInfo.topicName()),
+                                                rosNameMapper.toMessageMetadata(
+                                                        ddsInfo.topicType()),
+                                                ddsInfo.isPublisher(),
+                                                qosMapper.asJRos(ddsInfo.reliabilityType()),
+                                                qosMapper.asJRos(ddsInfo.durabilityType()));
+                                logger.info("New discovery information {0}", ros2Info);
+                                return Optional.of(ros2Info);
+                            } catch (Exception e) {
+                                logger.warning(
+                                        "Ignore discovery information for {0} due to translation"
+                                                + " error: {1}",
+                                        ddsInfo, e.getMessage());
+                                logger.fine(e.getMessage(), e);
+                                return Optional.empty();
+                            }
+                        }));
     }
 
     @Override

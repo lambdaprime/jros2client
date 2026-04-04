@@ -90,6 +90,12 @@ public interface JRos2Client extends JRosClient {
     }
 
     /**
+     * Subscribe to notifications about all ROS2 information about publishers and subscribers that
+     * have been discovered by the <b>jros2client</b>.
+     */
+    void subscribe(Subscriber<Ros2DiscoveryInfo> subscriber);
+
+    /**
      * {@inheritDoc}
      *
      * <p>Simplified version of {@link #publish(PublisherQos, TopicPublisher)} with {@link

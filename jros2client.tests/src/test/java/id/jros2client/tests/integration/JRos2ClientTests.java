@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.toList;
 import id.jros2client.JRos2Client;
 import id.jros2client.JRos2ClientConfiguration;
 import id.jros2client.JRos2ClientFactory;
+import id.jros2client.Ros2DiscoveryInfo;
 import id.jros2client.qos.QosReliability;
 import id.jros2client.qos.SubscriberQos;
 import id.jros2messages.Ros2MessageSerializationUtils;
@@ -30,6 +31,7 @@ import id.jrosclient.TopicSubmissionPublisher;
 import id.jrosclient.TopicSubscriber;
 import id.jrosmessages.std_msgs.StringMessage;
 import id.opentelemetry.exporters.extensions.ElasticsearchMetricsExtension;
+import id.xfunction.concurrent.flow.CollectorSubscriber;
 import id.xfunction.concurrent.flow.FixedCollectorSubscriber;
 import id.xfunction.lang.XThread;
 import id.xfunction.logging.XLogger;
@@ -41,6 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -245,11 +248,28 @@ public class JRos2ClientTests {
                             getSubscription().get().request(1);
                         }
                     });
+            var discoveryList = new ArrayList<Ros2DiscoveryInfo>();
+            client.subscribe(new CollectorSubscriber<>(discoveryList));
             ros2Commands
                     .runStaticPublisher("helloRos", QosReliability.BEST_EFFORT)
                     .forwardOutputAsync(true);
             // wait until 5 messages received
             future.get();
+            discoveryList.removeIf(
+                    info ->
+                            !List.of("helloRos", "ros_discovery_info", "rosout")
+                                    .contains(info.name().name()));
+            Assertions.assertEquals(
+"""
+{ "name": "helloRos", "type": "UntypedMessageMetadata[name=std_msgs/String, interfaceType=MESSAGE]", "isPublisher": "true", "reliabilityType": "BEST_EFFORT", "durabilityType": "VOLATILE" }
+{ "name": "ros_discovery_info", "type": "UntypedMessageMetadata[name=rmw_dds_common/ParticipantEntitiesInfo, interfaceType=MESSAGE]", "isPublisher": "false", "reliabilityType": "RELIABLE", "durabilityType": "TRANSIENT_LOCAL" }
+{ "name": "ros_discovery_info", "type": "UntypedMessageMetadata[name=rmw_dds_common/ParticipantEntitiesInfo, interfaceType=MESSAGE]", "isPublisher": "true", "reliabilityType": "RELIABLE", "durabilityType": "TRANSIENT_LOCAL" }
+{ "name": "rosout", "type": "UntypedMessageMetadata[name=rcl_interfaces/Log, interfaceType=MESSAGE]", "isPublisher": "true", "reliabilityType": "RELIABLE", "durabilityType": "TRANSIENT_LOCAL" }\
+""",
+                    discoveryList.stream()
+                            .map(Object::toString)
+                            .sorted()
+                            .collect(Collectors.joining("\n")));
         }
     }
 

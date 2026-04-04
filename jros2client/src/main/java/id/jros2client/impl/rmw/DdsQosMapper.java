@@ -47,6 +47,20 @@ public class DdsQosMapper {
         };
     }
 
+    public QosDurability asJRos(DurabilityType qos) {
+        return switch (qos) {
+            case TRANSIENT_LOCAL_DURABILITY_QOS -> QosDurability.TRANSIENT_LOCAL;
+            case VOLATILE_DURABILITY_QOS -> QosDurability.VOLATILE;
+        };
+    }
+
+    public QosReliability asJRos(ReliabilityType qos) {
+        return switch (qos) {
+            case BEST_EFFORT -> QosReliability.BEST_EFFORT;
+            case RELIABLE -> QosReliability.RELIABLE;
+        };
+    }
+
     public SubscriberQosPolicy asDds(SubscriberQos qos) {
         return new SubscriberQosPolicy(asDds(qos.qosReliability()), asDds(qos.qosDurability()));
     }
